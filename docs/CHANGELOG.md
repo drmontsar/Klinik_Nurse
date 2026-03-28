@@ -24,3 +24,5 @@
 - Added quick nursing note templates with autosave-by-patient in browser storage.
 - Added inline vitals recheck alerts, mobile-friendly numeric inputs, and a `Same as last visit` shortcut.
 - Refined filters so queue and patient-roster views stay patient-first instead of showing task-only controls.
+- Strengthened the `Klinik-N` wordmark contrast so the header branding reads clearly on the soft background.
+- Added active-state highlighting to the selected-patient quick actions so `Open tasks`, `Record vitals`, and `Open notes` visibly track the current view.

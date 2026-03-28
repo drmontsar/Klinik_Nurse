@@ -1,5 +1,6 @@
 import { NEWS2Badge } from '@/components/shared/NEWS2Badge'
 import { COLORS } from '@/constants/colors'
+import type { NurseWorkspaceTab } from '@/hooks/useNurseTaskBoard'
 import type { Patient } from '@/types/Patient'
 import type { Vitals } from '@/types/Vitals'
 
@@ -7,15 +8,33 @@ interface PatientContextBarProps {
   patient: Patient
   latestVitals: Vitals | null
   openTaskCount: number
+  activeTab: NurseWorkspaceTab
   onOpenTasks: () => void
   onOpenVitals: () => void
   onOpenNotes: () => void
+}
+
+function quickActionButtonStyle(isActive: boolean) {
+  return {
+    border: 0,
+    borderRadius: 16,
+    padding: '12px 16px',
+    backgroundColor: isActive ? COLORS.brand : COLORS.card,
+    color: isActive ? COLORS.onTone : COLORS.text,
+    fontWeight: 700,
+    cursor: 'pointer',
+    boxShadow: isActive
+      ? `0 12px 28px ${COLORS.shadowStrong}`
+      : `0 8px 18px ${COLORS.shadow}`,
+    transition: 'background-color 160ms ease, color 160ms ease, box-shadow 160ms ease',
+  } as const
 }
 
 export function PatientContextBar({
   patient,
   latestVitals,
   openTaskCount,
+  activeTab,
   onOpenTasks,
   onOpenVitals,
   onOpenNotes,
@@ -121,46 +140,19 @@ export function PatientContextBar({
       >
         <button
           onClick={onOpenTasks}
-          style={{
-            border: 0,
-            borderRadius: 16,
-            padding: '12px 16px',
-            backgroundColor: COLORS.brand,
-            color: COLORS.onTone,
-            fontWeight: 700,
-            cursor: 'pointer',
-            boxShadow: `0 12px 28px ${COLORS.shadowStrong}`,
-          }}
+          style={quickActionButtonStyle(activeTab === 'tasks')}
         >
           Open tasks
         </button>
         <button
           onClick={onOpenVitals}
-          style={{
-            border: 0,
-            borderRadius: 16,
-            padding: '12px 16px',
-            backgroundColor: COLORS.card,
-            color: COLORS.text,
-            fontWeight: 700,
-            cursor: 'pointer',
-            boxShadow: `0 8px 18px ${COLORS.shadow}`,
-          }}
+          style={quickActionButtonStyle(activeTab === 'vitals')}
         >
           Record vitals
         </button>
         <button
           onClick={onOpenNotes}
-          style={{
-            border: 0,
-            borderRadius: 16,
-            padding: '12px 16px',
-            backgroundColor: COLORS.card,
-            color: COLORS.text,
-            fontWeight: 700,
-            cursor: 'pointer',
-            boxShadow: `0 8px 18px ${COLORS.shadow}`,
-          }}
+          style={quickActionButtonStyle(activeTab === 'notes')}
         >
           Open notes
         </button>

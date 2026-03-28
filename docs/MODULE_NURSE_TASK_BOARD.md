@@ -156,9 +156,10 @@ This means local interaction survives refresh in the current scaffold.
 ### Product Framing
 
 - The header now leads with the product name `Klinik-N` rather than a module code banner.
-- The brand treatment uses softer blue-white gradients to feel professional, friendly, and nurse-centered.
+- The brand treatment uses a deeper blue gradient so the wordmark stays legible against the soft header surface.
 - The connection status now sits quietly in the top-right corner as a compact signal instead of occupying primary visual space.
 - The queue is the default workflow surface, while the patient roster is intentionally kept after task work so active execution stays primary.
+- The selected-patient quick actions now visibly highlight the active workspace so task and vitals context never switch silently.
 
 ### Medication
 

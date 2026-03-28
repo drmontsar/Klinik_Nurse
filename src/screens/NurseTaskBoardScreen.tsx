@@ -362,11 +362,12 @@ export function NurseTaskBoardScreen() {
                 fontWeight: 700,
                 letterSpacing: '-0.05em',
                 background:
-                  'linear-gradient(135deg, #FFFFFF 0%, #EEF7FF 20%, #C5DCF0 47%, #7EA8D0 73%, #476E96 100%)',
+                  'linear-gradient(135deg, #143958 0%, #23537A 28%, #3E79A6 56%, #73A8CF 82%, #B4D6F0 100%)',
                 WebkitBackgroundClip: 'text',
                 backgroundClip: 'text',
                 color: 'transparent',
-                textShadow: '0 12px 32px rgba(88, 126, 164, 0.24)',
+                textShadow: '0 10px 26px rgba(49, 84, 118, 0.18)',
+                filter: 'drop-shadow(0 2px 8px rgba(34, 67, 98, 0.1))',
               }}
             >
               Klinik-N
@@ -389,6 +390,7 @@ export function NurseTaskBoardScreen() {
             patient={selectedPatient}
             latestVitals={latestVitalsByPatient[selectedPatient.id] ?? null}
             openTaskCount={openTaskCountByPatient[selectedPatient.id] ?? 0}
+            activeTab={currentTab}
             onOpenTasks={() => openPatientTasks(selectedPatient.id)}
             onOpenVitals={() => openPatientVitals(selectedPatient.id)}
             onOpenNotes={() => setCurrentTab('notes')}
