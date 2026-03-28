@@ -16,3 +16,11 @@
 - Retuned the UI to a calmer, lighter clinical palette with muted accent colors and softer visual emphasis.
 - Replaced the module-heavy hero copy with a nurse-facing `Klinik-N` brand header.
 - Consolidated all mock patient seed data into `src/data/patients/mockPatients.ts` while keeping repository usage unchanged.
+- Moved the connection status into a compact top-right indicator.
+- Reordered the screen to prioritize active tasks and task completion workspace above the patient roster.
+- Added a lower-priority ward roster section for quick patient reference after task work.
+- Added a queue-first nurse workspace with bottom-tab mobile navigation and a left-rail desktop shell.
+- Added a persistent selected-patient context bar to reduce wrong-patient documentation risk.
+- Added quick nursing note templates with autosave-by-patient in browser storage.
+- Added inline vitals recheck alerts, mobile-friendly numeric inputs, and a `Same as last visit` shortcut.
+- Refined filters so queue and patient-roster views stay patient-first instead of showing task-only controls.

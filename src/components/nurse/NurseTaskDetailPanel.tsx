@@ -203,6 +203,7 @@ export function NurseTaskDetailPanel({
       {!isClosed && task.category === 'vitals' ? (
         <VitalsEntryForm
           busy={busy}
+          latestVitals={latestVitals}
           onSubmit={async (draft) => {
             await onRecordVitals(task, draft)
           }}

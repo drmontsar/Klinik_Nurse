@@ -9,6 +9,9 @@ interface NurseTaskFiltersProps {
   searchQuery: string
   statusFilter: TaskStatusFilter
   categoryFilter: TaskCategoryFilter
+  searchPlaceholder?: string
+  showStatusFilter?: boolean
+  showCategoryFilter?: boolean
   onSearchChange: (value: string) => void
   onStatusChange: (value: TaskStatusFilter) => void
   onCategoryChange: (value: TaskCategoryFilter) => void
@@ -30,16 +33,24 @@ export function NurseTaskFilters({
   searchQuery,
   statusFilter,
   categoryFilter,
+  searchPlaceholder = 'Search patient, bed, or task',
+  showStatusFilter = true,
+  showCategoryFilter = true,
   onSearchChange,
   onStatusChange,
   onCategoryChange,
 }: NurseTaskFiltersProps) {
+  const gridTemplateColumns =
+    showStatusFilter || showCategoryFilter
+      ? 'repeat(auto-fit, minmax(180px, 1fr))'
+      : 'minmax(0, 1fr)'
+
   return (
     <div
       style={{
         display: 'grid',
         gap: 12,
-        gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))',
+        gridTemplateColumns,
         padding: 14,
         borderRadius: 22,
         border: `1px solid ${COLORS.border}`,
@@ -50,37 +61,41 @@ export function NurseTaskFilters({
       <input
         value={searchQuery}
         onChange={(event) => onSearchChange(event.target.value)}
-        placeholder="Search patient, bed, or task"
+        placeholder={searchPlaceholder}
         style={inputStyle}
       />
-      <select
-        value={statusFilter}
-        onChange={(event) =>
-          onStatusChange(event.target.value as TaskStatusFilter)
-        }
-        style={inputStyle}
-      >
-        <option value="open">Open tasks</option>
-        <option value="all">All tasks</option>
-        <option value="pending">Pending</option>
-        <option value="in-progress">In progress</option>
-        <option value="completed">Completed</option>
-        <option value="deferred">Deferred</option>
-        <option value="escalated">Escalated</option>
-      </select>
-      <select
-        value={categoryFilter}
-        onChange={(event) =>
-          onCategoryChange(event.target.value as TaskCategoryFilter)
-        }
-        style={inputStyle}
-      >
-        <option value="all">All categories</option>
-        <option value="vitals">Vitals</option>
-        <option value="medication">Medication</option>
-        <option value="nursing">Nursing</option>
-        <option value="investigation-followup">Follow-up</option>
-      </select>
+      {showStatusFilter ? (
+        <select
+          value={statusFilter}
+          onChange={(event) =>
+            onStatusChange(event.target.value as TaskStatusFilter)
+          }
+          style={inputStyle}
+        >
+          <option value="open">Open tasks</option>
+          <option value="all">All tasks</option>
+          <option value="pending">Pending</option>
+          <option value="in-progress">In progress</option>
+          <option value="completed">Completed</option>
+          <option value="deferred">Deferred</option>
+          <option value="escalated">Escalated</option>
+        </select>
+      ) : null}
+      {showCategoryFilter ? (
+        <select
+          value={categoryFilter}
+          onChange={(event) =>
+            onCategoryChange(event.target.value as TaskCategoryFilter)
+          }
+          style={inputStyle}
+        >
+          <option value="all">All categories</option>
+          <option value="vitals">Vitals</option>
+          <option value="medication">Medication</option>
+          <option value="nursing">Nursing</option>
+          <option value="investigation-followup">Follow-up</option>
+        </select>
+      ) : null}
     </div>
   )
 }

@@ -1,6 +1,6 @@
 # KliniK Nurse
 
-KliniK Nurse is the nurse-facing bedside execution surface for the KliniK clinical platform. The current implementation is an offline-friendly nurse task board focused on structured task execution, vitals capture, medication confirmation, and audit-safe defer/escalate actions.
+KliniK Nurse is the nurse-facing bedside execution surface for the KliniK clinical platform. The current implementation is an offline-friendly, queue-first nurse workspace focused on structured task execution, fast vitals capture, medication confirmation, quick note drafting, and audit-safe defer/escalate actions.
 
 ## Current Status
 
@@ -8,6 +8,7 @@ KliniK Nurse is the nurse-facing bedside execution surface for the KliniK clinic
 - The current app is mock-first and repository-backed.
 - The first working slice is built around Ward 3 surgical oncology patients.
 - The current patient seed data is consolidated in one file and remains isolated behind repositories for an easier later database swap.
+- The main workflow now opens on a nurse queue with a persistent selected-patient context bar and a five-tab workspace shell.
 
 ## Tech Stack
 

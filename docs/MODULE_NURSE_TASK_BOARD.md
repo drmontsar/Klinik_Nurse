@@ -8,11 +8,13 @@ The nurse task board is the nurse-facing execution module for bedside work. It i
 
 The board should let a ward nurse:
 
-- quickly see which patient needs action first
+- land on the queue first and immediately see who needs attention
 - filter work by status and task category
 - open a task and act without navigating through multiple screens
+- keep the active patient context visible while moving between tabs
 - record vitals safely
 - confirm medication administration explicitly
+- draft quick nursing notes that autosave through interruptions
 - defer or escalate when bedside execution is unsafe or blocked
 - work inside a calm, low-stimulation visual system that preserves clarity without broadcasting panic
 
@@ -25,24 +27,42 @@ File: `src/screens/NurseTaskBoardScreen.tsx`
 Responsibilities:
 
 - render the `Klinik-N` nurse-facing product header and status metrics
-- show online/offline state
-- render filters
-- render task list
-- render detail panel for the selected task
+- keep the queue as the default home surface
+- show online/offline state through a compact top-right status signal
+- render a bottom tab bar on mobile and a left workspace rail on desktop
+- keep a persistent selected-patient context bar visible when a patient is active
+- render queue, task, vitals, notes, and patient-roster workspaces
+
+### Queue And Navigation
+
+Files:
+
+- `src/components/nurse/NurseWorkspaceNav.tsx`
+- `src/components/nurse/QueuePanel.tsx`
+- `src/components/nurse/PatientContextBar.tsx`
+- `src/components/nurse/NurseTaskFilters.tsx`
+
+Responsibilities:
+
+- make the nurse queue the default home screen
+- expose large tap targets for `Call next`, `Record vitals`, and `Open tasks`
+- keep search available in patient-first screens without crowding them with task-only filters
+- preserve patient identity and NEWS2 context across workspace tabs
 
 ### Task List
 
 Files:
 
-- `src/components/nurse/NurseTaskFilters.tsx`
 - `src/components/nurse/NurseTaskCard.tsx`
+- `src/components/nurse/PatientRosterPanel.tsx`
 
 Responsibilities:
 
 - search by patient, bed, or task text
-- filter by status
-- filter by category
+- filter by status and category inside task-centric tabs
 - show patient name, bed, NEWS2, priority, due time, and task status
+- let the nurse open a task quickly by clicking directly on the task card
+- keep the ward roster as a lower-priority reference section below the active task workspace
 
 ### Task Detail
 
@@ -59,12 +79,15 @@ Responsibilities:
 
 Files:
 
+- `src/components/nurse/NotesPanel.tsx`
 - `src/components/nurse/VitalsEntryForm.tsx`
 - `src/components/nurse/MedicationAdministrationForm.tsx`
 
 Responsibilities:
 
+- `NotesPanel` provides quick templates and autosaves note drafts locally by patient
 - `VitalsEntryForm` captures structured vitals and previews NEWS2
+- `VitalsEntryForm` uses numeric-friendly inputs, inline recheck alerts, and a `Same as last visit` shortcut
 - `MedicationAdministrationForm` enforces explicit bedside confirmation
 
 ## Logic Owner
@@ -74,7 +97,9 @@ The module logic lives in `src/hooks/useNurseTaskBoard.ts`.
 This hook currently owns:
 
 - initial board loading
-- filters and selected task state
+- workspace tab state
+- filters plus selected patient and task state
+- nurse note draft autosave state
 - error and success notice state
 - task status actions
 - vitals save flow
@@ -116,6 +141,7 @@ The source-event fields are important because the final product direction is eve
 - Task actions are written to browser `localStorage`
 - Vitals are written to browser `localStorage`
 - Patients are seeded from `src/data/patients/mockPatients.ts`
+- Nurse note drafts are written to browser `localStorage`
 
 This means local interaction survives refresh in the current scaffold.
 
@@ -131,6 +157,8 @@ This means local interaction survives refresh in the current scaffold.
 
 - The header now leads with the product name `Klinik-N` rather than a module code banner.
 - The brand treatment uses softer blue-white gradients to feel professional, friendly, and nurse-centered.
+- The connection status now sits quietly in the top-right corner as a compact signal instead of occupying primary visual space.
+- The queue is the default workflow surface, while the patient roster is intentionally kept after task work so active execution stays primary.
 
 ### Medication
 

@@ -6,6 +6,7 @@ export interface Patient {
   id: string
   name: string
   age: number
+  dateOfBirth: string
   sex: PatientSex
   bed: string
   ward: string

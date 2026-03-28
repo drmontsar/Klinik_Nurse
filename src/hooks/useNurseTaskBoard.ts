@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { CLINICIAN_CONTEXT } from '@/constants/config'
+import { CLINICIAN_CONTEXT, STORAGE_KEYS } from '@/constants/config'
 import {
   nurseTaskRepository,
   patientRepository,
@@ -13,6 +13,48 @@ import { calculateNEWS2 } from '@/utils/calculateNEWS2'
 
 export type TaskStatusFilter = 'all' | 'open' | NurseTaskStatus
 export type TaskCategoryFilter = 'all' | NurseTaskCategory
+export type NurseWorkspaceTab =
+  | 'queue'
+  | 'tasks'
+  | 'vitals'
+  | 'notes'
+  | 'patients'
+
+interface StoredNoteDrafts {
+  drafts: Record<string, string>
+  savedAt: Record<string, string>
+}
+
+function readNoteDraftsFromStorage(): StoredNoteDrafts {
+  if (typeof window === 'undefined') {
+    return { drafts: {}, savedAt: {} }
+  }
+
+  const rawDrafts = window.localStorage.getItem(
+    STORAGE_KEYS.NURSE_NOTE_DRAFTS,
+  )
+
+  if (!rawDrafts) {
+    return { drafts: {}, savedAt: {} }
+  }
+
+  try {
+    return JSON.parse(rawDrafts) as StoredNoteDrafts
+  } catch {
+    return { drafts: {}, savedAt: {} }
+  }
+}
+
+function writeNoteDraftsToStorage(drafts: StoredNoteDrafts): void {
+  if (typeof window === 'undefined') {
+    return
+  }
+
+  window.localStorage.setItem(
+    STORAGE_KEYS.NURSE_NOTE_DRAFTS,
+    JSON.stringify(drafts),
+  )
+}
 
 function createClinicalId(prefix: string): string {
   if (typeof crypto !== 'undefined' && 'randomUUID' in crypto) {
@@ -23,12 +65,18 @@ function createClinicalId(prefix: string): string {
 }
 
 export function useNurseTaskBoard() {
+  const storedNoteDrafts = readNoteDraftsFromStorage()
   const [patients, setPatients] = useState<Patient[]>([])
   const [tasks, setTasks] = useState<NurseTask[]>([])
   const [latestVitalsByPatient, setLatestVitalsByPatient] = useState<
     Record<string, Vitals | null>
   >({})
   const [selectedTaskId, setSelectedTaskId] = useState<string | null>(null)
+  const [selectedPatientId, setSelectedPatientId] = useState<string | null>(
+    null,
+  )
+  const [currentTab, setCurrentTab] =
+    useState<NurseWorkspaceTab>('queue')
   const [searchQuery, setSearchQuery] = useState('')
   const [statusFilter, setStatusFilter] =
     useState<TaskStatusFilter>('open')
@@ -38,6 +86,12 @@ export function useNurseTaskBoard() {
   const [busyTaskId, setBusyTaskId] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [notice, setNotice] = useState<string | null>(null)
+  const [noteDrafts, setNoteDrafts] = useState<Record<string, string>>(
+    storedNoteDrafts.drafts,
+  )
+  const [noteSavedAtByPatient, setNoteSavedAtByPatient] = useState<
+    Record<string, string>
+  >(storedNoteDrafts.savedAt)
 
   async function loadBoard(): Promise<void> {
     setError(null)
@@ -64,7 +118,24 @@ export function useNurseTaskBoard() {
 
       return taskList[0]?.id ?? null
     })
+    setSelectedPatientId((currentPatientId) => {
+      if (
+        currentPatientId &&
+        patientList.some((patient) => patient.id === currentPatientId)
+      ) {
+        return currentPatientId
+      }
+
+      return taskList[0]?.patientId ?? patientList[0]?.id ?? null
+    })
   }
+
+  useEffect(() => {
+    writeNoteDraftsToStorage({
+      drafts: noteDrafts,
+      savedAt: noteSavedAtByPatient,
+    })
+  }, [noteDrafts, noteSavedAtByPatient])
 
   useEffect(() => {
     let isMounted = true
@@ -131,6 +202,97 @@ export function useNurseTaskBoard() {
     },
     {},
   )
+  const selectedPatient =
+    (selectedPatientId ? patientById[selectedPatientId] : null) ??
+    (selectedTask ? patientById[selectedTask.patientId] ?? null : null)
+
+  function selectTask(taskId: string): void {
+    const nextTask = tasks.find((task) => task.id === taskId)
+
+    setSelectedTaskId(taskId)
+
+    if (nextTask) {
+      setSelectedPatientId(nextTask.patientId)
+    }
+  }
+
+  function selectPatient(patientId: string): void {
+    setSelectedPatientId(patientId)
+  }
+
+  function callNextPatient(patientId: string): void {
+    const patient = patientById[patientId]
+    setSelectedPatientId(patientId)
+    setCurrentTab('queue')
+    setNotice(
+      patient
+        ? `${patient.name} has been called to the station.`
+        : 'Patient has been called to the station.',
+    )
+  }
+
+  function openPatientTasks(patientId: string): void {
+    const openTask = tasks.find(
+      (task) =>
+        task.patientId === patientId &&
+        (task.status === 'pending' || task.status === 'in-progress'),
+    )
+    const fallbackTask = tasks.find((task) => task.patientId === patientId)
+
+    setSelectedPatientId(patientId)
+    setCurrentTab('tasks')
+
+    if (openTask ?? fallbackTask) {
+      setSelectedTaskId((openTask ?? fallbackTask)!.id)
+    }
+  }
+
+  function openPatientVitals(patientId: string): void {
+    const vitalsTask = tasks.find(
+      (task) =>
+        task.patientId === patientId &&
+        task.category === 'vitals' &&
+        (task.status === 'pending' || task.status === 'in-progress'),
+    )
+
+    setSelectedPatientId(patientId)
+    setCurrentTab('vitals')
+
+    if (vitalsTask) {
+      setSelectedTaskId(vitalsTask.id)
+    }
+  }
+
+  function updateSelectedPatientNoteDraft(nextDraft: string): void {
+    if (!selectedPatient) {
+      return
+    }
+
+    const savedAt = new Date().toISOString()
+
+    setNoteDrafts((currentDrafts) => ({
+      ...currentDrafts,
+      [selectedPatient.id]: nextDraft,
+    }))
+    setNoteSavedAtByPatient((currentSavedAt) => ({
+      ...currentSavedAt,
+      [selectedPatient.id]: savedAt,
+    }))
+  }
+
+  function appendNoteTemplate(template: string): void {
+    if (!selectedPatient) {
+      return
+    }
+
+    const currentDraft = noteDrafts[selectedPatient.id] ?? ''
+    const nextDraft =
+      currentDraft.trim().length === 0
+        ? template
+        : `${currentDraft.trim()} ${template}`
+
+    updateSelectedPatientNoteDraft(nextDraft)
+  }
 
   async function refresh(): Promise<void> {
     setLoading(true)
@@ -357,21 +519,33 @@ export function useNurseTaskBoard() {
     tasks,
     filteredTasks,
     selectedTask,
+    selectedPatient,
     patientById,
     latestVitalsByPatient,
     loading,
     busyTaskId,
     error,
     notice,
+    currentTab,
     searchQuery,
     statusFilter,
     categoryFilter,
-    setSelectedTaskId,
+    noteDraft: selectedPatient ? noteDrafts[selectedPatient.id] ?? '' : '',
+    noteSavedAt:
+      selectedPatient ? noteSavedAtByPatient[selectedPatient.id] ?? null : null,
+    setSelectedTaskId: selectTask,
+    setSelectedPatientId: selectPatient,
+    setCurrentTab,
     setSearchQuery,
     setStatusFilter,
     setCategoryFilter,
     setError,
     setNotice,
+    callNextPatient,
+    openPatientTasks,
+    openPatientVitals,
+    updateSelectedPatientNoteDraft,
+    appendNoteTemplate,
     refresh,
     startTask,
     completeChecklistTask,

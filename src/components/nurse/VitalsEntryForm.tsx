@@ -2,10 +2,11 @@ import type { CSSProperties } from 'react'
 import { useState } from 'react'
 import { COLORS } from '@/constants/colors'
 import { calculateNEWS2 } from '@/utils/calculateNEWS2'
-import type { VitalsDraft } from '@/types/Vitals'
+import type { Vitals, VitalsDraft } from '@/types/Vitals'
 
 interface VitalsEntryFormProps {
   busy: boolean
+  latestVitals?: Vitals | null
   onSubmit: (draft: VitalsDraft) => Promise<void>
 }
 
@@ -47,12 +48,66 @@ function parseNumericValue(value: string): number | null {
   return parsedValue
 }
 
+function getVitalAlertMessage(
+  field: keyof Pick<
+    VitalsDraft,
+    | 'temperature'
+    | 'heartRate'
+    | 'systolicBP'
+    | 'diastolicBP'
+    | 'spo2'
+    | 'respiratoryRate'
+  >,
+  value: number | null,
+): string | null {
+  if (value === null) {
+    return null
+  }
+
+  // SAFETY: These inline range cues surface potentially abnormal entries immediately so the nurse can recheck before moving on.
+  switch (field) {
+    case 'temperature':
+      return value >= 38.5 || value <= 35 ? 'Recheck temperature' : null
+    case 'heartRate':
+      return value >= 120 || value <= 50 ? 'Recheck heart rate' : null
+    case 'systolicBP':
+      return value <= 90 || value >= 180 ? 'Recheck systolic BP' : null
+    case 'diastolicBP':
+      return value <= 50 || value >= 110 ? 'Review diastolic BP' : null
+    case 'spo2':
+      return value <= 93 ? 'Low saturation detected' : null
+    case 'respiratoryRate':
+      return value >= 24 || value <= 10 ? 'Recheck respiratory rate' : null
+    default:
+      return null
+  }
+}
+
 export function VitalsEntryForm({
   busy,
+  latestVitals = null,
   onSubmit,
 }: VitalsEntryFormProps) {
   const [draft, setDraft] = useState<VitalsDraft>(emptyVitalsDraft)
   const assessment = calculateNEWS2(draft)
+
+  function useLastVitals(): void {
+    if (!latestVitals) {
+      return
+    }
+
+    setDraft({
+      temperature: latestVitals.temperature,
+      heartRate: latestVitals.heartRate,
+      systolicBP: latestVitals.systolicBP,
+      diastolicBP: latestVitals.diastolicBP,
+      spo2: latestVitals.spo2,
+      respiratoryRate: latestVitals.respiratoryRate,
+      consciousness: latestVitals.consciousness,
+      onSupplementalOxygen: latestVitals.onSupplementalOxygen,
+      spO2Scale: latestVitals.spO2Scale,
+    })
+  }
 
   return (
     <div
@@ -63,16 +118,42 @@ export function VitalsEntryForm({
     >
       <div
         style={{
+          display: 'flex',
+          gap: 10,
+          flexWrap: 'wrap',
+        }}
+      >
+        <button
+          disabled={!latestVitals}
+          onClick={useLastVitals}
+          style={{
+            border: 0,
+            borderRadius: 14,
+            padding: '10px 14px',
+            backgroundColor: latestVitals ? COLORS.brandBg : COLORS.border,
+            color: latestVitals ? COLORS.brand : COLORS.textMuted,
+            fontWeight: 700,
+            cursor: latestVitals ? 'pointer' : 'not-allowed',
+          }}
+        >
+          Same as last visit
+        </button>
+      </div>
+
+      <div
+        style={{
           display: 'grid',
           gap: 12,
           gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))',
         }}
       >
         <label style={{ color: COLORS.textMuted }}>
-          Temperature
+          Temperature (°C)
           <input
             style={inputStyle}
             type="number"
+            inputMode="decimal"
+            step="0.1"
             value={draft.temperature ?? ''}
             onChange={(event) =>
               setDraft((currentDraft) => ({
@@ -81,12 +162,18 @@ export function VitalsEntryForm({
               }))
             }
           />
+          {getVitalAlertMessage('temperature', draft.temperature) ? (
+            <div style={{ color: COLORS.red, fontSize: 12, marginTop: 6 }}>
+              {getVitalAlertMessage('temperature', draft.temperature)}
+            </div>
+          ) : null}
         </label>
         <label style={{ color: COLORS.textMuted }}>
-          Heart Rate
+          Heart Rate (bpm)
           <input
             style={inputStyle}
             type="number"
+            inputMode="numeric"
             value={draft.heartRate ?? ''}
             onChange={(event) =>
               setDraft((currentDraft) => ({
@@ -95,12 +182,18 @@ export function VitalsEntryForm({
               }))
             }
           />
+          {getVitalAlertMessage('heartRate', draft.heartRate) ? (
+            <div style={{ color: COLORS.red, fontSize: 12, marginTop: 6 }}>
+              {getVitalAlertMessage('heartRate', draft.heartRate)}
+            </div>
+          ) : null}
         </label>
         <label style={{ color: COLORS.textMuted }}>
-          Systolic BP
+          Systolic BP (mmHg)
           <input
             style={inputStyle}
             type="number"
+            inputMode="numeric"
             value={draft.systolicBP ?? ''}
             onChange={(event) =>
               setDraft((currentDraft) => ({
@@ -109,12 +202,18 @@ export function VitalsEntryForm({
               }))
             }
           />
+          {getVitalAlertMessage('systolicBP', draft.systolicBP) ? (
+            <div style={{ color: COLORS.red, fontSize: 12, marginTop: 6 }}>
+              {getVitalAlertMessage('systolicBP', draft.systolicBP)}
+            </div>
+          ) : null}
         </label>
         <label style={{ color: COLORS.textMuted }}>
-          Diastolic BP
+          Diastolic BP (mmHg)
           <input
             style={inputStyle}
             type="number"
+            inputMode="numeric"
             value={draft.diastolicBP ?? ''}
             onChange={(event) =>
               setDraft((currentDraft) => ({
@@ -123,12 +222,18 @@ export function VitalsEntryForm({
               }))
             }
           />
+          {getVitalAlertMessage('diastolicBP', draft.diastolicBP) ? (
+            <div style={{ color: COLORS.red, fontSize: 12, marginTop: 6 }}>
+              {getVitalAlertMessage('diastolicBP', draft.diastolicBP)}
+            </div>
+          ) : null}
         </label>
         <label style={{ color: COLORS.textMuted }}>
-          SpO2
+          SpO2 (%)
           <input
             style={inputStyle}
             type="number"
+            inputMode="numeric"
             value={draft.spo2 ?? ''}
             onChange={(event) =>
               setDraft((currentDraft) => ({
@@ -137,12 +242,18 @@ export function VitalsEntryForm({
               }))
             }
           />
+          {getVitalAlertMessage('spo2', draft.spo2) ? (
+            <div style={{ color: COLORS.red, fontSize: 12, marginTop: 6 }}>
+              {getVitalAlertMessage('spo2', draft.spo2)}
+            </div>
+          ) : null}
         </label>
         <label style={{ color: COLORS.textMuted }}>
-          Respiratory Rate
+          Respiratory Rate (/min)
           <input
             style={inputStyle}
             type="number"
+            inputMode="numeric"
             value={draft.respiratoryRate ?? ''}
             onChange={(event) =>
               setDraft((currentDraft) => ({
@@ -151,6 +262,17 @@ export function VitalsEntryForm({
               }))
             }
           />
+          {getVitalAlertMessage(
+            'respiratoryRate',
+            draft.respiratoryRate,
+          ) ? (
+            <div style={{ color: COLORS.red, fontSize: 12, marginTop: 6 }}>
+              {getVitalAlertMessage(
+                'respiratoryRate',
+                draft.respiratoryRate,
+              )}
+            </div>
+          ) : null}
         </label>
       </div>
 

@@ -15,11 +15,13 @@ If you are taking over this codebase, read these files in this order:
 ## What Exists Today
 
 - A greenfield React/Vite nurse app scaffold
-- A first working nurse task board
+- A queue-first nurse workspace with mobile bottom tabs and desktop side navigation
 - Mock surgical oncology patients
 - Mock nurse tasks
 - Repository-backed data access
 - NEWS2 calculation and vitals capture
+- Persistent selected-patient context across queue, tasks, vitals, and notes
+- Autosaved nurse note drafts stored locally by patient
 - Medication confirmation flow
 - Defer and escalate actions with audit trail
 - PWA build configuration
@@ -49,8 +51,10 @@ The current module is shaped around clinical execution. The important logic is n
 `src/hooks/useNurseTaskBoard.ts` is the single most important file in the current module because it coordinates:
 
 - loading
+- workspace tabs
 - filters
-- task selection
+- patient and task selection
+- note draft autosave
 - repository actions
 - vitals workflow
 - medication workflow

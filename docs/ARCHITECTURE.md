@@ -7,6 +7,7 @@ This document explains how the current codebase is structured, how data moves th
 ## Core Principles
 
 - Clinical-first workflow: the UI is built around bedside execution, not generic task management.
+- Queue-first navigation: the nurse lands on the queue first, then moves into tasks, vitals, notes, and roster from one consistent workspace shell.
 - Structured data only: vitals, tasks, medication confirmations, and patient context are typed.
 - Offline-friendly behavior: the board can continue functioning from browser storage.
 - Audit-friendly actions: task completion, defer, and escalate actions append to an audit trail.
@@ -17,15 +18,16 @@ This document explains how the current codebase is structured, how data moves th
 1. `src/main.tsx` boots the React app.
 2. `src/App.tsx` renders `NurseTaskBoardScreen`.
 3. `src/screens/NurseTaskBoardScreen.tsx` composes the module UI.
-4. `src/hooks/useNurseTaskBoard.ts` owns loading, filtering, selection, and nurse actions.
+4. `src/hooks/useNurseTaskBoard.ts` owns loading, filtering, selection, note drafting, and nurse actions.
 5. The hook talks to repositories exported from `src/repositories/index.ts`.
 6. The active repositories are currently mock implementations.
 7. Mock repositories read from mock data and persist nurse actions to `localStorage`.
+8. Selected-patient notes also autosave to `localStorage` so interruptions do not discard work in progress.
 
 ## Directory Guide
 
 - `src/components/nurse/`
-  Nurse-task-board UI pieces such as filters, cards, detail panel, vitals form, and medication form.
+  Nurse-task-board UI pieces such as queue, workspace navigation, patient context, filters, cards, detail panel, notes, vitals form, and medication form.
 - `src/components/shared/`
   Shared UI primitives such as loading, error, offline, and NEWS2 badges.
 - `src/constants/`
@@ -33,7 +35,7 @@ This document explains how the current codebase is structured, how data moves th
 - `src/data/`
   Mock patients and mock nurse tasks.
 - `src/hooks/`
-  Board logic and browser online/offline state.
+  Board logic, viewport behavior, and browser online/offline state.
 - `src/repositories/`
   Interfaces, implementations, and the repository entry point.
 - `src/screens/`
@@ -54,6 +56,15 @@ This document explains how the current codebase is structured, how data moves th
   supports reading by id
   supports NEWS2 updates after full vitals capture
   keeps all ward patient seed data in one file while preserving the same repository contract for a later real database
+
+### Nurse Notes Drafts
+
+- Source: browser `localStorage`
+- Owner: `useNurseTaskBoard`
+- Current behavior:
+  stores draft nursing notes by patient id
+  updates the saved timestamp on each keystroke
+  keeps note drafting separate from repository-backed clinical records until a later real note domain is introduced
 
 ### Nurse Tasks
 
@@ -89,6 +100,9 @@ This document explains how the current codebase is structured, how data moves th
 ### Record Vitals
 
 - Nurse enters only numeric-or-null vitals values
+- Mobile-friendly numeric keyboards are requested through `inputMode`
+- Inline recheck warnings surface abnormal values while the nurse types
+- A `Same as last visit` shortcut can preload the latest structured vitals
 - `calculateNEWS2` validates completeness
 - Incomplete vitals do not produce a final NEWS2 score
 - Complete vitals are saved
@@ -120,7 +134,7 @@ This document explains how the current codebase is structured, how data moves th
 - There is no authentication flow yet.
 - There is no backend sync yet.
 - There are no automated tests yet.
-- The app is still a single-screen module scaffold.
+- Notes are still local nurse drafts, not confirmed chart notes.
 
 ## Documentation Maintenance
 

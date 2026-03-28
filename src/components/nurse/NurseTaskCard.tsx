@@ -46,6 +46,7 @@ export function NurseTaskCard({
           ? `0 22px 46px ${COLORS.shadowStrong}`
           : `0 14px 32px ${COLORS.shadow}`,
         transition: 'transform 160ms ease, box-shadow 160ms ease',
+        transform: isSelected ? 'translateY(-2px)' : 'translateY(0)',
       }}
     >
       <div
@@ -139,6 +140,39 @@ export function NurseTaskCard({
           }}
         >
           {task.status}
+        </span>
+      </div>
+
+      <div
+        style={{
+          marginTop: 14,
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          gap: 12,
+          color: isSelected ? COLORS.brand : COLORS.textDim,
+          fontSize: 12,
+          fontWeight: 700,
+          letterSpacing: 0.2,
+          textTransform: 'uppercase',
+        }}
+      >
+        <span>{isSelected ? 'Task open' : 'Click to open task'}</span>
+        <span
+          style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            width: 28,
+            height: 28,
+            borderRadius: '50%',
+            backgroundColor: isSelected ? COLORS.brandBg : COLORS.surface,
+            color: isSelected ? COLORS.brand : COLORS.textMuted,
+            fontSize: 18,
+            lineHeight: 1,
+          }}
+        >
+          →
         </span>
       </div>
     </button>
