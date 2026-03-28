@@ -12,13 +12,25 @@ function metricCard(label: string, value: number, tone: string) {
   return (
     <div
       style={{
-        borderRadius: 18,
-        padding: 16,
-        backgroundColor: COLORS.card,
+        borderRadius: 22,
+        padding: 18,
+        backgroundColor: COLORS.surface,
         border: `1px solid ${COLORS.border}`,
+        boxShadow: `0 18px 44px ${COLORS.shadow}`,
       }}
     >
-      <div style={{ color: COLORS.textDim, marginBottom: 6 }}>{label}</div>
+      <div
+        style={{
+          color: COLORS.textDim,
+          marginBottom: 8,
+          fontSize: 12,
+          letterSpacing: 0.6,
+          textTransform: 'uppercase',
+          fontWeight: 700,
+        }}
+      >
+        {label}
+      </div>
       <div style={{ color: tone, fontWeight: 800, fontSize: 24 }}>{value}</div>
     </div>
   )
@@ -68,7 +80,7 @@ export function NurseTaskBoardScreen() {
       style={{
         minHeight: '100vh',
         background:
-          'radial-gradient(circle at top left, rgba(45,125,210,0.22), transparent 32%), #0A0E1A',
+          'radial-gradient(circle at top left, rgba(107,148,135,0.18), transparent 34%), linear-gradient(180deg, #F9FCFA 0%, #EEF4F0 46%, #F7FAF8 100%)',
         color: COLORS.text,
       }}
     >
@@ -85,41 +97,35 @@ export function NurseTaskBoardScreen() {
           style={{
             display: 'grid',
             gap: 16,
+            padding: 28,
+            borderRadius: 30,
+            border: `1px solid ${COLORS.border}`,
+            background:
+              'linear-gradient(135deg, rgba(255,255,255,0.86), rgba(229,240,235,0.96))',
+            boxShadow: `0 24px 54px ${COLORS.shadow}`,
           }}
         >
           <div>
             <div
               style={{
-                color: COLORS.brandLight,
-                textTransform: 'uppercase',
-                letterSpacing: 1.6,
-                fontSize: 12,
-                fontWeight: 700,
-                marginBottom: 8,
+                display: 'inline-block',
+                marginBottom: 10,
+                paddingBottom: 4,
+                fontSize: 'clamp(2.5rem, 6vw, 4.8rem)',
+                lineHeight: 0.95,
+                fontFamily: '"Newsreader", Georgia, serif',
+                fontWeight: 600,
+                letterSpacing: '-0.05em',
+                background:
+                  'linear-gradient(135deg, #FBFDFF 0%, #DDECF8 24%, #AFCBE4 52%, #7FA6C7 78%, #5E84A6 100%)',
+                WebkitBackgroundClip: 'text',
+                backgroundClip: 'text',
+                color: 'transparent',
+                textShadow: '0 8px 26px rgba(111, 145, 176, 0.16)',
               }}
             >
-              Module 1.2
+              Klinik-N
             </div>
-            <h1
-              style={{
-                margin: 0,
-                fontSize: 'clamp(2rem, 4vw, 3.4rem)',
-                lineHeight: 1,
-              }}
-            >
-              Nurse Task Board
-            </h1>
-            <p
-              style={{
-                margin: '12px 0 0',
-                color: COLORS.textMuted,
-                maxWidth: 720,
-                lineHeight: 1.6,
-              }}
-            >
-              Structured bedside work generated from confirmed clinical actions.
-              No transcripts, no ambiguous notes, and no silent failures.
-            </p>
           </div>
           <OfflineBanner isOnline={isOnline} />
         </header>
@@ -154,6 +160,7 @@ export function NurseTaskBoardScreen() {
               backgroundColor: COLORS.greenBg,
               border: `1px solid ${COLORS.green}`,
               color: COLORS.text,
+              boxShadow: `0 14px 30px ${COLORS.shadow}`,
             }}
           >
             {notice}
@@ -165,6 +172,7 @@ export function NurseTaskBoardScreen() {
                 background: 'transparent',
                 color: COLORS.green,
                 cursor: 'pointer',
+                fontWeight: 700,
               }}
             >
               Dismiss
@@ -203,6 +211,7 @@ export function NurseTaskBoardScreen() {
                     backgroundColor: COLORS.surface,
                     padding: 24,
                     color: COLORS.textMuted,
+                    boxShadow: `0 18px 44px ${COLORS.shadow}`,
                   }}
                 >
                   No tasks match the current filters.

@@ -11,9 +11,10 @@ export function ErrorCard({ message, onRetry }: ErrorCardProps) {
       style={{
         border: `1px solid ${COLORS.red}`,
         backgroundColor: COLORS.redBg,
-        borderRadius: 18,
+        borderRadius: 20,
         padding: 16,
         color: COLORS.text,
+        boxShadow: `0 18px 36px ${COLORS.shadow}`,
       }}
     >
       <div style={{ fontWeight: 700, marginBottom: 6 }}>
@@ -30,8 +31,9 @@ export function ErrorCard({ message, onRetry }: ErrorCardProps) {
             borderRadius: 999,
             padding: '10px 14px',
             backgroundColor: COLORS.red,
-            color: COLORS.text,
+            color: COLORS.onTone,
             cursor: 'pointer',
+            fontWeight: 700,
           }}
         >
           Retry

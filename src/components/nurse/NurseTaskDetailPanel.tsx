@@ -56,6 +56,9 @@ export function NurseTaskDetailPanel({
           padding: 24,
           color: COLORS.textMuted,
           minHeight: 400,
+          boxShadow: `0 20px 48px ${COLORS.shadow}`,
+          display: 'flex',
+          alignItems: 'center',
         }}
       >
         Select a task to review patient details and bedside actions.
@@ -77,6 +80,7 @@ export function NurseTaskDetailPanel({
         padding: 24,
         display: 'grid',
         gap: 18,
+        boxShadow: `0 24px 56px ${COLORS.shadow}`,
       }}
     >
       <div
@@ -119,6 +123,7 @@ export function NurseTaskDetailPanel({
             padding: 14,
             backgroundColor: COLORS.card,
             border: `1px solid ${COLORS.border}`,
+            boxShadow: `0 10px 24px ${COLORS.shadow}`,
           }}
         >
           <div style={{ color: COLORS.textDim, marginBottom: 6 }}>Task</div>
@@ -130,6 +135,7 @@ export function NurseTaskDetailPanel({
             padding: 14,
             backgroundColor: COLORS.card,
             border: `1px solid ${COLORS.border}`,
+            boxShadow: `0 10px 24px ${COLORS.shadow}`,
           }}
         >
           <div style={{ color: COLORS.textDim, marginBottom: 6 }}>Due</div>
@@ -141,6 +147,7 @@ export function NurseTaskDetailPanel({
             padding: 14,
             backgroundColor: COLORS.card,
             border: `1px solid ${COLORS.border}`,
+            boxShadow: `0 10px 24px ${COLORS.shadow}`,
           }}
         >
           <div style={{ color: COLORS.textDim, marginBottom: 6 }}>Status</div>
@@ -154,6 +161,7 @@ export function NurseTaskDetailPanel({
           padding: 16,
           backgroundColor: COLORS.card,
           border: `1px solid ${COLORS.border}`,
+          boxShadow: `0 10px 24px ${COLORS.shadow}`,
         }}
       >
         <div style={{ color: COLORS.text, fontWeight: 700, marginBottom: 8 }}>
@@ -182,9 +190,10 @@ export function NurseTaskDetailPanel({
             borderRadius: 14,
             padding: '12px 14px',
             backgroundColor: busy ? COLORS.border : COLORS.purple,
-            color: COLORS.text,
+            color: COLORS.onTone,
             fontWeight: 700,
             cursor: busy ? 'not-allowed' : 'pointer',
+            boxShadow: busy ? 'none' : `0 12px 28px ${COLORS.shadowStrong}`,
           }}
         >
           Mark in progress
@@ -222,10 +231,11 @@ export function NurseTaskDetailPanel({
             style={{
               borderRadius: 14,
               border: `1px solid ${COLORS.border}`,
-              backgroundColor: COLORS.bg,
+              backgroundColor: COLORS.card,
               color: COLORS.text,
               padding: 12,
               resize: 'vertical',
+              boxShadow: `0 8px 22px ${COLORS.shadow}`,
             }}
           />
           <button
@@ -238,9 +248,10 @@ export function NurseTaskDetailPanel({
               borderRadius: 14,
               padding: '12px 14px',
               backgroundColor: busy ? COLORS.border : COLORS.brand,
-              color: COLORS.text,
+              color: COLORS.onTone,
               fontWeight: 700,
               cursor: busy ? 'not-allowed' : 'pointer',
+              boxShadow: busy ? 'none' : `0 12px 28px ${COLORS.shadowStrong}`,
             }}
           >
             {busy ? 'Saving task...' : 'Complete task'}
@@ -264,6 +275,7 @@ export function NurseTaskDetailPanel({
               border: `1px solid ${COLORS.border}`,
               display: 'grid',
               gap: 10,
+              boxShadow: `0 10px 24px ${COLORS.shadow}`,
             }}
           >
             <div style={{ color: COLORS.text, fontWeight: 700 }}>Defer</div>
@@ -275,10 +287,11 @@ export function NurseTaskDetailPanel({
               style={{
                 borderRadius: 12,
                 border: `1px solid ${COLORS.border}`,
-                backgroundColor: COLORS.bg,
+                backgroundColor: COLORS.card,
                 color: COLORS.text,
                 padding: 12,
                 resize: 'vertical',
+                boxShadow: `0 8px 22px ${COLORS.shadow}`,
               }}
             />
             <button
@@ -292,12 +305,16 @@ export function NurseTaskDetailPanel({
                   busy || deferReason.trim().length === 0
                     ? COLORS.border
                     : COLORS.amber,
-                color: COLORS.text,
+                color: COLORS.onTone,
                 fontWeight: 700,
                 cursor:
                   busy || deferReason.trim().length === 0
                     ? 'not-allowed'
                     : 'pointer',
+                boxShadow:
+                  busy || deferReason.trim().length === 0
+                    ? 'none'
+                    : `0 12px 28px ${COLORS.shadowStrong}`,
               }}
             >
               Defer with reason
@@ -312,6 +329,7 @@ export function NurseTaskDetailPanel({
               border: `1px solid ${COLORS.border}`,
               display: 'grid',
               gap: 10,
+              boxShadow: `0 10px 24px ${COLORS.shadow}`,
             }}
           >
             <div style={{ color: COLORS.text, fontWeight: 700 }}>Escalate</div>
@@ -323,10 +341,11 @@ export function NurseTaskDetailPanel({
               style={{
                 borderRadius: 12,
                 border: `1px solid ${COLORS.border}`,
-                backgroundColor: COLORS.bg,
+                backgroundColor: COLORS.card,
                 color: COLORS.text,
                 padding: 12,
                 resize: 'vertical',
+                boxShadow: `0 8px 22px ${COLORS.shadow}`,
               }}
             />
             <button
@@ -340,12 +359,16 @@ export function NurseTaskDetailPanel({
                   busy || escalateReason.trim().length === 0
                     ? COLORS.border
                     : COLORS.red,
-                color: COLORS.text,
+                color: COLORS.onTone,
                 fontWeight: 700,
                 cursor:
                   busy || escalateReason.trim().length === 0
                     ? 'not-allowed'
                     : 'pointer',
+                boxShadow:
+                  busy || escalateReason.trim().length === 0
+                    ? 'none'
+                    : `0 12px 28px ${COLORS.shadowStrong}`,
               }}
             >
               Escalate task
@@ -360,6 +383,7 @@ export function NurseTaskDetailPanel({
           padding: 16,
           backgroundColor: COLORS.card,
           border: `1px solid ${COLORS.border}`,
+          boxShadow: `0 10px 24px ${COLORS.shadow}`,
         }}
       >
         <div style={{ color: COLORS.text, fontWeight: 700, marginBottom: 10 }}>
@@ -377,7 +401,7 @@ export function NurseTaskDetailPanel({
                 style={{
                   borderRadius: 12,
                   padding: 12,
-                  backgroundColor: COLORS.bg,
+                  backgroundColor: COLORS.surface,
                   color: COLORS.textMuted,
                   lineHeight: 1.5,
                 }}

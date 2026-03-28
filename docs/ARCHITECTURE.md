@@ -47,12 +47,13 @@ This document explains how the current codebase is structured, how data moves th
 
 ### Patients
 
-- Source: `src/data/patients/`
+- Source: `src/data/patients/mockPatients.ts`
 - Repository: `MockPatientRepository`
 - Current behavior:
   returns a NEWS2-sorted patient list
   supports reading by id
   supports NEWS2 updates after full vitals capture
+  keeps all ward patient seed data in one file while preserving the same repository contract for a later real database
 
 ### Nurse Tasks
 

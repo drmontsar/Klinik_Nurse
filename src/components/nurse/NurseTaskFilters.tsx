@@ -21,6 +21,9 @@ const inputStyle: CSSProperties = {
   color: COLORS.text,
   padding: '12px 14px',
   minWidth: 0,
+  boxSizing: 'border-box',
+  outline: 'none',
+  boxShadow: `0 8px 22px ${COLORS.shadow}`,
 }
 
 export function NurseTaskFilters({
@@ -37,6 +40,11 @@ export function NurseTaskFilters({
         display: 'grid',
         gap: 12,
         gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))',
+        padding: 14,
+        borderRadius: 22,
+        border: `1px solid ${COLORS.border}`,
+        backgroundColor: COLORS.surface,
+        boxShadow: `0 18px 44px ${COLORS.shadow}`,
       }}
     >
       <input

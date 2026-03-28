@@ -10,12 +10,12 @@ export default defineConfig({
       registerType: 'autoUpdate',
       includeAssets: [],
       manifest: {
-        name: 'KliniK Nurse',
-        short_name: 'KliniK Nurse',
+        name: 'Klinik-N',
+        short_name: 'Klinik-N',
         description:
           'Offline-friendly nurse task board for structured ward execution.',
-        theme_color: '#0A0E1A',
-        background_color: '#0A0E1A',
+        theme_color: '#EEF4F0',
+        background_color: '#EEF4F0',
         display: 'standalone',
         start_url: './',
       },

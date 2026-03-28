@@ -214,6 +214,14 @@ This is called the Repository Pattern.
 It is the data equivalent of the vendor
 abstraction layer for external services.
 
+Repository note for this nurse module repo:
+the current Ward 3 patient seed data is
+consolidated in `src/data/patients/mockPatients.ts`.
+The repository contract still isolates the
+screen and hook layers, so moving to a real
+database later still requires only minimal
+repository/config changes.
+
 ---
 
 ### The Pattern — Three Layers
@@ -266,15 +274,8 @@ src/
                             the rest of the app uses
 ├── data/
 │   ├── patients/
-│   │   ├── index.ts          ← exports all patients
-│   │   ├── rajeshKumar.ts    ← one file per patient
-│   │   ├── priyaSharma.ts
-│   │   ├── mohammedIsmail.ts
-│   │   ├── anitaDesai.ts
-│   │   ├── vikramSingh.ts
-│   │   ├── sunitaRao.ts
-│   │   ├── lakshmiNair.ts
-│   │   └── arunPatel.ts
+│   │   ├── index.ts          ← stable import path
+│   │   └── mockPatients.ts   ← consolidated ward seed data
 │   ├── clinicalNotes/
 │   │   └── index.ts
 │   ├── vitals/
@@ -470,194 +471,48 @@ export class MockPatientRepository
 
 ---
 
-### The Patient Data Files — One Patient Per File
+### The Patient Data File — One Swappable Seed Source
 
-Split the single mockPatients array into
-individual files. Each file is one patient.
-This makes editing and reviewing individual
-patient records easy.
+For this nurse module repo, keep the Ward 3
+mock patient data in one consolidated seed
+file so it can be swapped out cleanly later
+without touching the UI or hooks.
 ```typescript
-// src/data/patients/rajeshKumar.ts
+// src/data/patients/mockPatients.ts
 
-import type { Patient } from '@/types/patient'
+import type { Patient } from '@/types/Patient'
 
 /**
- * Rajesh Kumar — PRIMARY DEMO PATIENT
- * Post-Whipple Day 1, NEWS2: 8
- * Used for ambient scribing demonstration.
- * @clinical-note All clinical data is realistic
- * for a post-Whipple procedure patient with
- * suspected anastomotic leak.
+ * Consolidated nurse-module patient seed data.
+ * Keep this behind the repository layer so a
+ * real database can replace it later with
+ * minimal change outside repositories.
  */
-export const rajeshKumar: Patient = {
-  id: 'patient-001',
-  name: 'Rajesh Kumar',
-  age: 67,
-  sex: 'M',
-  bed: 'B-04',
-  ward: 'Surgical Oncology — Ward 3',
-  diagnosis: 'Carcinoma head of pancreas — post-Whipple Day 1',
-  admissionDay: 1,
-  news2: 8,
-  status: 'active',
-  overnight: 'Febrile episode at 0230hrs (38.9°C), two episodes of tachycardia HR 118. Drain output 280ml overnight. IV Piperacillin-Tazobactam started 0400hrs.',
-  problems: [
-    'Post-Whipple Day 1 — monitoring for anastomotic leak',
-    'Fever — possible early surgical site infection',
-    'Tachycardia — likely pain and fever related',
-    'Poor pain control — PCA morphine requirements high',
-  ],
-  medications: [
-    {
-      id: 'med-001',
-      name: 'Inj. Piperacillin-Tazobactam',
-      dose: '4.5g',
-      route: 'IV',
-      frequency: 'Q8H',
-      status: 'overdue',
-      // SAFETY: Overdue antibiotic in a post-op
-      // febrile patient is a clinical priority.
-    },
-    {
-      id: 'med-002',
-      name: 'Inj. Morphine PCA',
-      dose: '1mg bolus',
-      route: 'IV',
-      frequency: 'PRN',
-      status: 'active',
-    },
-    {
-      id: 'med-003',
-      name: 'Inj. Pantoprazole',
-      dose: '40mg',
-      route: 'IV',
-      frequency: 'BD',
-      status: 'active',
-    },
-    {
-      id: 'med-004',
-      name: 'Inj. Ondansetron',
-      dose: '4mg',
-      route: 'IV',
-      frequency: 'Q8H',
-      status: 'active',
-    },
-    {
-      id: 'med-005',
-      name: 'Inj. Enoxaparin',
-      dose: '40mg',
-      route: 'SC',
-      frequency: 'OD',
-      status: 'active',
-    },
-  ],
-  vitals: [
-    {
-      id: 'vitals-001-a',
-      patientId: 'patient-001',
-      recordedAt: '06:00',
-      temperature: 38.6,
-      heartRate: 114,
-      systolicBP: 98,
-      diastolicBP: 62,
-      spo2: 96,
-      respiratoryRate: 22,
-      consciousness: 'alert',
-      onSupplementalOxygen: false,
-      spO2Scale: 1,
-      // CLINICAL: NEWS2 from these vitals = 8
-      // T38.6→1, HR114→2, BP98→2, SpO2 96→0,
-      // RR22→2, Alert→0, No O2→0. Total = 7+
-      // Actually: T→1, HR→2, SBP→2, SpO2→0,
-      // RR→2, ACVPU→0 = 7. No O2 = +0.
-      // Note: recalculate to confirm score of 8
-    },
-    {
-      id: 'vitals-001-b',
-      patientId: 'patient-001',
-      recordedAt: '02:00',
-      temperature: 38.9,
-      heartRate: 118,
-      systolicBP: 94,
-      diastolicBP: 58,
-      spo2: 95,
-      respiratoryRate: 24,
-      consciousness: 'alert',
-      onSupplementalOxygen: false,
-      spO2Scale: 1,
-    },
-    {
-      id: 'vitals-001-c',
-      patientId: 'patient-001',
-      recordedAt: '22:00',
-      temperature: 37.8,
-      heartRate: 104,
-      systolicBP: 102,
-      diastolicBP: 66,
-      spo2: 97,
-      respiratoryRate: 20,
-      consciousness: 'alert',
-      onSupplementalOxygen: false,
-      spO2Scale: 1,
-    },
-  ],
-  investigations: [
-    {
-      id: 'inv-001-a',
-      patientId: 'patient-001',
-      name: 'Serum Amylase',
-      status: 'critical',
-      value: '1840 U/L',
-      orderedAt: '06:00',
-      // CLINICAL: Drain fluid amylase >5000 U/L
-      // is diagnostic of pancreatic fistula.
-      // Serum amylase elevation post-Whipple
-      // raises concern for anastomotic leak.
-    },
-    {
-      id: 'inv-001-b',
-      name: 'Blood Culture x2',
-      patientId: 'patient-001',
-      status: 'sent',
-      value: null,
-      orderedAt: '03:00',
-    },
-    {
-      id: 'inv-001-c',
-      name: 'CBC + CRP',
-      patientId: 'patient-001',
-      status: 'resulted',
-      value: 'WBC 18.4, CRP 186',
-      orderedAt: '06:00',
-    },
-    {
-      id: 'inv-001-d',
-      name: 'Drain Fluid Amylase',
-      patientId: 'patient-001',
-      status: 'sent',
-      value: null,
-      orderedAt: '06:00',
-    },
-    {
-      id: 'inv-001-e',
-      name: 'CT Abdomen',
-      patientId: 'patient-001',
-      status: 'pending',
-      value: null,
-      orderedAt: '07:00',
-    },
-  ],
-  lastNote: 'Post-op Day 1 Whipple. Haemodynamically borderline. Fever and drain output concerning for anastomotic leak vs. early SSI. Awaiting drain fluid amylase. CT if clinical deterioration.',
-  lastNurseNote: 'Patient restless overnight. Pain poorly controlled despite PCA. Drain output bloodstained initially, now bile-stained. Family informed at 0400hrs.',
-}
+export const mockPatients: Patient[] = [
+  {
+    id: 'patient-001',
+    name: 'Rajesh Kumar',
+    age: 67,
+    sex: 'M',
+    bed: 'B-04',
+    ward: 'Surgical Oncology - Ward 3',
+    diagnosis: 'Carcinoma head of pancreas - post-Whipple Day 1',
+    news2: 8,
+    status: 'active',
+    allergies: ['No known drug allergies'],
+    lastNurseNote:
+      'Patient restless overnight. Pain poorly controlled despite PCA. Drain output now bile-stained.',
+  },
+  // ...remaining ward patients...
+]
 ```
 ```typescript
 // src/data/patients/index.ts
 
 /**
- * All mock patients exported as an array.
- * Import individual patients for detailed
- * editing. Import this file for the full list.
+ * Stable export path for patient seed data.
+ * Repositories import from here, so a later
+ * data-source swap does not affect the UI.
  *
  * TO SWAP TO REAL DATABASE:
  * 1. Change DATA_SOURCE in config.ts
@@ -665,36 +520,7 @@ export const rajeshKumar: Patient = {
  * The repositories handle the rest.
  */
 
-import { rajeshKumar } from './rajeshKumar'
-import { priyaSharma } from './priyaSharma'
-import { mohammedIsmail } from './mohammedIsmail'
-import { anitaDesai } from './anitaDesai'
-import { vikramSingh } from './vikramSingh'
-import { sunitaRao } from './sunitaRao'
-import { lakshmiNair } from './lakshmiNair'
-import { arunPatel } from './arunPatel'
-
-export const patients: Patient[] = [
-  rajeshKumar,
-  priyaSharma,
-  mohammedIsmail,
-  anitaDesai,
-  vikramSingh,
-  sunitaRao,
-  lakshmiNair,
-  arunPatel,
-]
-
-export {
-  rajeshKumar,
-  priyaSharma,
-  mohammedIsmail,
-  anitaDesai,
-  vikramSingh,
-  sunitaRao,
-  lakshmiNair,
-  arunPatel,
-}
+export { mockPatients as patients } from './mockPatients'
 ```
 
 ---
@@ -878,25 +704,26 @@ export const VENDORS = {
 
 ### Why One Patient Per File Matters
 
-When you have one mockPatients.ts file with
-all 8 patients, making changes is risky —
-editing one patient can accidentally break
-another. Finding a specific patient requires
-scrolling through hundreds of lines.
+In this nurse module repo, the current mock
+patient seed data is intentionally kept in one
+file so the entire ward roster can be reviewed,
+edited, and swapped out together while the
+repository layer keeps the rest of the app
+unaware of that storage choice.
 
-With one file per patient:
-- Edit Rajesh Kumar without touching Priya Sharma
-- Find any patient instantly with Ctrl+P
-- Review a patient's clinical data in isolation
-- Add a new demo patient without touching existing ones
-- Git history shows exactly which patient was changed
-  and when — essential audit trail even for mock data
+With one consolidated seed file:
+- the ward roster lives in one predictable place
+- the repository import path does not change
+- moving from seed data to a real database still
+  avoids changes in screens and hooks
+- the nurse module can keep a simple mock setup
+  while the data source remains swappable later
 
-When you add new demo patients for different
-specialties — paediatrics, orthopaedics,
-obstetrics — each one gets its own file.
-The data/patients/ folder becomes a clinical
-scenario library that grows with the product.
+If the patient dataset grows significantly or
+specialty-specific seed packs become hard to
+maintain, the repository contract still allows
+the data files to be split again later without
+changing the UI layer.
 ```
 
 ---
@@ -914,14 +741,7 @@ src/
 ├── data/
 │   ├── patients/
 │   │   ├── index.ts
-│   │   ├── rajeshKumar.ts
-│   │   ├── priyaSharma.ts
-│   │   ├── mohammedIsmail.ts
-│   │   ├── anitaDesai.ts
-│   │   ├── vikramSingh.ts
-│   │   ├── sunitaRao.ts
-│   │   ├── lakshmiNair.ts
-│   │   └── arunPatel.ts
+│   │   └── mockPatients.ts
 │   ├── clinicalNotes/
 │   ├── vitals/
 │   ├── investigations/
@@ -1538,13 +1358,14 @@ Module 1.2 — Nurse Task Board
 	•	[x] Nurse Task Board screen created
 	•	[x] Nurse task filters and task cards created
 	•	[x] Nurse task detail panel created
-	•	[x] Mock patient data for Ward 3 created
+	•	[x] Mock patient seed data consolidated in src/data/patients/mockPatients.ts
 	•	[x] Mock nurse task data created
 	•	[x] Repository layer for patients, tasks, and vitals created
 	•	[x] Vitals entry with NEWS2 preview and validation created
 	•	[x] Medication administration confirmation flow created
 	•	[x] Defer and escalate task flows with audit trail created
 	•	[x] Offline banner and local browser persistence created
+	•	[x] Klinik-N nurse-facing product header created
 	•	[ ] Event-driven task generation from confirmed notes
 	•	[ ] Role-based nurse authentication
 	•	[ ] Real backend sync

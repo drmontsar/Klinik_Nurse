@@ -25,10 +25,11 @@ const inputStyle: CSSProperties = {
   width: '100%',
   borderRadius: 12,
   border: `1px solid ${COLORS.border}`,
-  backgroundColor: COLORS.bg,
+  backgroundColor: COLORS.card,
   color: COLORS.text,
   padding: '10px 12px',
   boxSizing: 'border-box',
+  boxShadow: `0 8px 22px ${COLORS.shadow}`,
 }
 
 function parseNumericValue(value: string): number | null {
@@ -233,6 +234,7 @@ export function VitalsEntryForm({
                 : COLORS.border
           }`,
           color: COLORS.text,
+          boxShadow: `0 14px 30px ${COLORS.shadow}`,
         }}
       >
         <div style={{ fontWeight: 700, marginBottom: 6 }}>NEWS2 preview</div>
@@ -252,9 +254,13 @@ export function VitalsEntryForm({
           padding: '12px 14px',
           backgroundColor:
             busy || !assessment.isComplete ? COLORS.border : COLORS.brand,
-          color: COLORS.text,
+          color: COLORS.onTone,
           fontWeight: 700,
           cursor: busy || !assessment.isComplete ? 'not-allowed' : 'pointer',
+          boxShadow:
+            busy || !assessment.isComplete
+              ? 'none'
+              : `0 12px 28px ${COLORS.shadowStrong}`,
         }}
       >
         {busy ? 'Saving vitals...' : 'Save vitals and complete task'}

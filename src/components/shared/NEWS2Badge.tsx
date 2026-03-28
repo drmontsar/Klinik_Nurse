@@ -30,11 +30,12 @@ export function NEWS2Badge({ score }: NEWS2BadgeProps) {
         alignItems: 'center',
         gap: 8,
         borderRadius: 999,
-        padding: '6px 10px',
+        padding: '7px 11px',
         backgroundColor: badgeColors.background,
         color: badgeColors.color,
         fontWeight: 700,
         fontSize: 12,
+        border: `1px solid ${badgeColors.color}22`,
       }}
     >
       NEWS2 {score}

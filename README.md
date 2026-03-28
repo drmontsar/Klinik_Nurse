@@ -7,6 +7,7 @@ KliniK Nurse is the nurse-facing bedside execution surface for the KliniK clinic
 - `Module 1.2 — Nurse Task Board` has started.
 - The current app is mock-first and repository-backed.
 - The first working slice is built around Ward 3 surgical oncology patients.
+- The current patient seed data is consolidated in one file and remains isolated behind repositories for an easier later database swap.
 
 ## Tech Stack
 

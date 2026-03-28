@@ -38,10 +38,14 @@ export function NurseTaskCard({
           isSelected ? COLORS.brand : COLORS.border
         }`,
         backgroundColor: isSelected ? COLORS.surface : COLORS.card,
-        borderRadius: 22,
-        padding: 16,
+        borderRadius: 24,
+        padding: 18,
         textAlign: 'left',
         cursor: 'pointer',
+        boxShadow: isSelected
+          ? `0 22px 46px ${COLORS.shadowStrong}`
+          : `0 14px 32px ${COLORS.shadow}`,
+        transition: 'transform 160ms ease, box-shadow 160ms ease',
       }}
     >
       <div
@@ -103,7 +107,7 @@ export function NurseTaskCard({
           style={{
             borderRadius: 999,
             padding: '6px 10px',
-            backgroundColor: COLORS.bg,
+            backgroundColor: COLORS.brandBg,
             color: getPriorityColor(task.priority),
             fontSize: 12,
             fontWeight: 700,
@@ -116,7 +120,7 @@ export function NurseTaskCard({
           style={{
             borderRadius: 999,
             padding: '6px 10px',
-            backgroundColor: COLORS.bg,
+            backgroundColor: COLORS.surface,
             color: COLORS.textMuted,
             fontSize: 12,
             fontWeight: 600,
@@ -128,7 +132,7 @@ export function NurseTaskCard({
           style={{
             borderRadius: 999,
             padding: '6px 10px',
-            backgroundColor: COLORS.bg,
+            backgroundColor: COLORS.surface,
             color: COLORS.textMuted,
             fontSize: 12,
             fontWeight: 600,

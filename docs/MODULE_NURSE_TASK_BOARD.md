@@ -14,6 +14,7 @@ The board should let a ward nurse:
 - record vitals safely
 - confirm medication administration explicitly
 - defer or escalate when bedside execution is unsafe or blocked
+- work inside a calm, low-stimulation visual system that preserves clarity without broadcasting panic
 
 ## Current Screen Structure
 
@@ -23,7 +24,7 @@ File: `src/screens/NurseTaskBoardScreen.tsx`
 
 Responsibilities:
 
-- render module header and status metrics
+- render the `Klinik-N` nurse-facing product header and status metrics
 - show online/offline state
 - render filters
 - render task list
@@ -114,7 +115,7 @@ The source-event fields are important because the final product direction is eve
 - Nurse tasks are seeded from `src/data/nurseTasks/mockNurseTasks.ts`
 - Task actions are written to browser `localStorage`
 - Vitals are written to browser `localStorage`
-- Patients are seeded from `src/data/patients/`
+- Patients are seeded from `src/data/patients/mockPatients.ts`
 
 This means local interaction survives refresh in the current scaffold.
 
@@ -125,6 +126,11 @@ This means local interaction survives refresh in the current scaffold.
 - The vitals form stores numeric-or-null values.
 - NEWS2 preview updates from the form state.
 - The user cannot complete the vitals task unless the required NEWS2 fields are present.
+
+### Product Framing
+
+- The header now leads with the product name `Klinik-N` rather than a module code banner.
+- The brand treatment uses softer blue-white gradients to feel professional, friendly, and nurse-centered.
 
 ### Medication
 

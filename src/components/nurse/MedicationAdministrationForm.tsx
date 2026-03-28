@@ -22,9 +22,10 @@ export function MedicationAdministrationForm({
         style={{
           borderRadius: 16,
           padding: 14,
-          backgroundColor: COLORS.bg,
+          backgroundColor: COLORS.surface,
           border: `1px solid ${COLORS.border}`,
           color: COLORS.text,
+          boxShadow: `0 14px 30px ${COLORS.shadow}`,
         }}
       >
         <div style={{ fontWeight: 700, marginBottom: 6 }}>
@@ -66,10 +67,11 @@ export function MedicationAdministrationForm({
         style={{
           borderRadius: 14,
           border: `1px solid ${COLORS.border}`,
-          backgroundColor: COLORS.bg,
+          backgroundColor: COLORS.card,
           color: COLORS.text,
           padding: 12,
           resize: 'vertical',
+          boxShadow: `0 8px 22px ${COLORS.shadow}`,
         }}
       />
 
@@ -82,9 +84,13 @@ export function MedicationAdministrationForm({
           padding: '12px 14px',
           backgroundColor:
             busy || !confirmationChecked ? COLORS.border : COLORS.brand,
-          color: COLORS.text,
+          color: COLORS.onTone,
           fontWeight: 700,
           cursor: busy || !confirmationChecked ? 'not-allowed' : 'pointer',
+          boxShadow:
+            busy || !confirmationChecked
+              ? 'none'
+              : `0 12px 28px ${COLORS.shadowStrong}`,
         }}
       >
         {busy ? 'Saving administration...' : 'Confirm administration'}

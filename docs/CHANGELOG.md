@@ -13,3 +13,6 @@
 - Added `.gitignore` for safe git pushes.
 - Added GitHub Pages deployment workflow.
 - Updated Vite static-hosting base configuration for page deployment.
+- Retuned the UI to a calmer, lighter clinical palette with muted accent colors and softer visual emphasis.
+- Replaced the module-heavy hero copy with a nurse-facing `Klinik-N` brand header.
+- Consolidated all mock patient seed data into `src/data/patients/mockPatients.ts` while keeping repository usage unchanged.
