@@ -8,7 +8,10 @@ export interface Patient {
   age: number
   dateOfBirth: string
   sex: PatientSex
-  bed: string
+  /** Bed/location identifier. Null when not available from the API. */
+  bed: string | null
+  /** Patient MRN (medical record number), distinct from bed. */
+  mrn: string | null
   ward: string
   diagnosis: string
   news2: number

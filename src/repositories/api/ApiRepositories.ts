@@ -26,7 +26,7 @@ export class ApiPatientRepository implements IPatientRepository {
   async getAll(): Promise<Patient[]> {
     const { organizationId, wardId } = platformSession.context()
     const encounters = await platformSession.request<Encounter[]>(`/organizations/${organizationId}/encounters?wardId=${wardId}`)
-    return encounters.map(encounter => ({ id: encounter.id, name: encounter.display_name, age: 0, dateOfBirth: '', sex: 'Unknown', bed: encounter.mrn ?? '—', ward: 'Assigned ward', diagnosis: 'Clinical details loading', news2: 0, status: 'active', allergies: [], lastNurseNote: '' }))
+    return encounters.map(encounter => ({ id: encounter.id, name: encounter.display_name, age: 0, dateOfBirth: '', sex: 'Unknown', bed: null, mrn: encounter.mrn ?? null, ward: 'Assigned ward', diagnosis: 'Clinical details loading', news2: 0, status: 'active', allergies: [], lastNurseNote: '' }))
   }
   async getById(id: string) { return (await this.getAll()).find(patient => patient.id === id) ?? null }
   async updateNEWS2(): Promise<void> {}
