@@ -1,3 +1,7 @@
+// ponytail: duplicate of @klinik-local/clinical-rules `calculateNews2`. Threshold
+// changes MUST be mirrored in the canonical package or scores drift between apps.
+// Upgrade: import from '@klinik-local/clinical-rules' after `pnpm add` links it,
+// keep only risk-tier mapping / missing-parameter reporting local.
 import { NEWS2_THRESHOLDS } from '@/constants/news2Thresholds'
 import type { Consciousness, NEWS2Assessment, VitalsDraft } from '@/types/Vitals'
 
