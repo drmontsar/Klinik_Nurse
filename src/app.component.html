@@ -1,0 +1,67 @@
+<header><div><h1>KliniK Nurse</h1><p>Ward execution and bedside documentation</p></div><button type="button" (click)="refresh()" [disabled]="loading() || saving() || !ready()">Refresh</button></header>
+@if (demo) { <p class="banner">Synthetic demo mode — records on this device only.</p> }
+@if (!online()) { <p class="banner" role="status">Offline. Versioned commands stay on this device until reconnect.</p> }
+@if (queued() || review()) { <p class="banner" role="status">{{ queued() }} commands awaiting sync · {{ review() }} need review.</p> }
+<main>
+@if (error()) { <div class="error" role="alert">{{ error() }} @if (!ready()) { <a href="/auth/login?returnTo=/nurse/">Open Nurse session</a> } @else { <button type="button" (click)="refresh()">Retry</button> }</div> }
+@if (notice()) { <p class="notice" role="status">{{ notice() }}</p> }
+@if (loading()) { <p role="status">Loading ward…</p> }
+@if (ready()) {
+<nav aria-label="Nurse workspace">
+@for (section of ['queue', 'tasks', 'vitals', 'notes', 'patients']; track section) { <button type="button" [class.active]="tab() === section" (click)="changeTab(section)">{{ section }}</button> }
+@if (!demo) { <button type="button" [class.active]="tab() === 'handover'" (click)="changeTab('handover')">Handover</button> }
+</nav>
+@if (selectedPatient(); as patient) { <div class="context"><b>{{ patient.name }}</b><span>{{ patient.bed }} · {{ patient.ward }}</span><span>{{ patient.diagnosis }}</span>@if (demo) { <span>NEWS2 {{ patient.news2 }}</span> } @else { <span>Latest device NEWS2: {{ latestVitals()[patient.id]?.news2Score ?? 'Not recorded' }}</span> }</div> }
+@if (tab() === 'queue' || tab() === 'patients') {
+<section class="roster">
+@for (patient of patients(); track patient.id) {
+<article><h2>{{ patient.name }}</h2><p>{{ patient.bed }} · {{ patient.ward }} · {{ patient.diagnosis }}</p><p>{{ openCount(patient.id) }} open tasks</p>
+@if (demo) { <p>NEWS2 {{ patient.news2 }} · {{ patient.allergies.join(', ') || 'No allergies recorded' }}</p> }
+<div class="actions"><button type="button" (click)="callNext(patient.id)">Call next</button><button type="button" (click)="openPatient(patient.id, true)">Record vitals</button><button type="button" (click)="openPatient(patient.id)">Open tasks</button><button type="button" (click)="selectPatient(patient.id); changeTab('notes')">Notes</button></div>
+</article>
+} @empty { <article>No active ward patients.</article> }
+</section>
+}
+@if (tab() === 'tasks' || tab() === 'vitals') {
+<div class="filters"><label>Search<input type="search" [ngModel]="search()" (ngModelChange)="search.set($event)" placeholder="Patient, task or bed"></label><label>Status<select [ngModel]="status()" (ngModelChange)="status.set($event)">@for (option of ['open', 'all', 'pending', 'in-progress', 'completed', 'deferred', 'escalated']; track option) { <option [value]="option">{{ option }}</option> }</select></label><label>Category<select [ngModel]="category()" (ngModelChange)="category.set($event)">@for (option of ['all', 'vitals', 'medication', 'nursing', 'investigation-followup']; track option) { <option [value]="option">{{ option }}</option> }</select></label></div>
+<div class="workspace"><aside><h2>Task queue</h2>
+@for (task of filteredTasks(); track task.id) { <button class="task" type="button" [class.active]="selectedTaskId() === task.id" [disabled]="saving()" (click)="selectTask(task)"><b>{{ task.title }}</b><small>{{ task.category }} · {{ task.priority }} · {{ task.status }}</small><small>{{ task.dueAt }}</small></button> }
+@empty { <p>No matching tasks.</p> }
+</aside><section>
+@if (selectedTask(); as task) {
+<h2>{{ task.title }}</h2><p>{{ task.description }}</p><p>{{ task.status }} · {{ task.assignedTo }}</p>
+@if (task.status === 'pending' || task.status === 'in-progress') {
+@if (task.category === 'vitals') {
+<form #vitalsForm="ngForm" (ngSubmit)="recordVitals()"><h3>Observation set</h3><div class="fields">
+@for (field of vitalFields; track field.key) { <label>{{ field.label }}<input [name]="field.key" [(ngModel)]="vitals[field.key]" type="number" [min]="field.min" [max]="field.max" [step]="field.step"></label> }
+<label>Consciousness<select name="consciousness" [(ngModel)]="vitals.consciousness"><option [ngValue]="null">Not recorded</option>@for (state of ['alert', 'confusion', 'voice', 'pain', 'unresponsive']; track state) { <option [value]="state">{{ state }}</option> }</select></label>
+<label>Supplemental oxygen<select name="oxygen" [(ngModel)]="vitals.onSupplementalOxygen"><option [ngValue]="null">Not recorded</option><option [ngValue]="false">No</option><option [ngValue]="true">Yes</option></select></label>
+<label>SpO₂ scale<select name="scale" [(ngModel)]="vitals.spO2Scale"><option [ngValue]="null">Not recorded</option><option [ngValue]="1">Scale 1</option><option [ngValue]="2">Scale 2 — prescribed target only</option></select></label>
+</div><p>NEWS2 preview: {{ assessment.score ?? 'Incomplete' }} {{ assessment.risk }}</p>@if (!assessment.isComplete) { <p class="muted">Missing: {{ assessment.missingParameters.join(', ') }}</p> }<p class="muted">Server NEWS2 remains authoritative. Incomplete observations remain incomplete.</p><div class="actions"><button type="button" (click)="useLastVitals()" [disabled]="!latestVitals()[selectedPatientId()]">Use last device observations</button><button [disabled]="saving() || vitalsForm.invalid">Save observations</button></div></form>
+}
+@else if (medication(); as medication) {
+<form #medicationForm="ngForm" (ngSubmit)="administer()"><h3>{{ medication.medicationOrder.name }}</h3><p>{{ medication.medicationOrder.dose }} · {{ medication.medicationOrder.route }} · {{ medication.medicationOrder.schedule }}</p><p class="warning">{{ medication.medicationOrder.safetyNote }}</p><label class="check"><input name="confirmed" [(ngModel)]="confirmed" type="checkbox" required> I have confirmed the right patient, drug, dose, route, and timing.</label><label>Administration note<textarea name="note" [(ngModel)]="administrationNote" rows="3"></textarea></label><button [disabled]="saving() || medicationForm.invalid || !confirmed">Confirm administration</button></form>
+}
+@else {
+<form (ngSubmit)="completeChecklist()"><label>Completion note<textarea name="checklistNote" [(ngModel)]="checklistNote" rows="3"></textarea></label><button [disabled]="saving()">Complete task</button></form>
+}
+@if (demo || task.category !== 'medication') {
+<div class="actions"><button type="button" (click)="startTask()" [disabled]="saving() || task.status !== 'pending'">Start task</button></div><form #stateForm="ngForm" (ngSubmit)="transition()"><h3>Defer or escalate</h3><label>Action<select name="transition" [(ngModel)]="transitionState"><option value="deferred">Defer</option><option value="escalated">Escalate</option></select></label><label>Reason<textarea name="reason" [(ngModel)]="reason" rows="2" required></textarea></label><button [disabled]="saving() || stateForm.invalid">Update task</button></form>
+}
+}
+@if (task.auditTrail.length) { <h3>Task history</h3>@for (entry of task.auditTrail; track $index) { <p>{{ entry.status }} · {{ entry.actedBy }} · {{ entry.actedAt }} {{ entry.note }}</p> } }
+}
+@else { <h2>Select a task</h2><p>Choose a task to record its bedside action.</p> }
+</section></div>
+}
+@if (tab() === 'notes') {
+<section class="card">@if (selectedPatient(); as patient) { <h2>Device note draft — {{ patient.name }}</h2><p class="muted">Drafts are saved on this device. They are not signed clinical notes.</p><div class="actions">@for (template of noteTemplates; track template) { <button type="button" (click)="appendTemplate(template)">{{ template }}</button> }</div><label>Draft<textarea rows="9" [ngModel]="draft()" (ngModelChange)="saveDraft($event)"></textarea></label><small>Last device save: {{ savedAt() || 'Not saved' }}</small> } @else { <p>Select a patient from the queue.</p> }</section>
+}
+@if (tab() === 'handover' && !demo) {
+<div class="workspace"><aside><h2>Shift handovers</h2>@for (sheet of sheets(); track sheet.id) { <button class="task" type="button" (click)="openHandover(sheet.id)"><b>{{ sheet.name }}</b><small>{{ sheet.status }} · {{ sheet.floor || 'Ward' }}</small></button> } @empty { <p>No handovers in your ward.</p> }</aside><section>
+@if (handover(); as sheet) { <h2>{{ sheet.name }}</h2>@for (item of sheet.items; track item.id) { <article><b>Bed {{ item.bed || 'Unassigned' }}</b> · {{ item.severity }}<p>{{ item.diagnosis_summary || 'Diagnosis not verified' }}</p><p>{{ item.task_summary }}</p>@if (sheet.status === 'published') { <button type="button" (click)="acknowledge(item)" [disabled]="saving()">Acknowledge version {{ item.version }}</button> }</article> } }
+@else { <h2>Select a handover</h2><p>Review the prior shift and acknowledge its patient items.</p> }
+</section></div>
+}
+}
+</main>

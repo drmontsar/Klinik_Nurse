@@ -1,5 +1,21 @@
 # Changelog
 
+## 2026-09-28 — Angular migration
+
+- Replaced React/Vite UI with Angular 22.2 standalone components, signals, and forms.
+- Retained API/demo repositories, clinical types, NEWS2 preview, existing device storage keys, and Dexie command schema.
+- Added fresh-session organization selection, matching-session queue replay, and distinct device-queued versus server-confirmed notices.
+- Added Angular production service worker for app assets and updated the deployment artifact path.
+- Verified medication confirmation, persisted dose/unit/route, draft reload, incomplete observations, offline replay, and embedded handover in the connected Chrome check.
+- Updated runtime, module, handover, and setup documentation.
+
+## 2026-09-25
+
+- Connected the Nurse queue to authenticated platform encounter and task projections.
+- Added API patient, task, and vitals repositories with an explicit `/nurse/?demo=1` mode.
+- Added single-command observation and medication administration flows with server versions.
+- Configured the `/nurse/` base, PWA scope, and gateway-compatible API proxy.
+
 ## 2026-03-28
 
 - Created the initial `KliniK Nurse` React/Vite/PWA scaffold.

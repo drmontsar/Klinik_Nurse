@@ -1,4 +1,4 @@
-export type PatientSex = 'M' | 'F'
+export type PatientSex = 'M' | 'F' | 'Unknown'
 
 export type PatientStatus = 'active' | 'discharged'
 

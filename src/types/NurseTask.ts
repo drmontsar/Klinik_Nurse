@@ -45,6 +45,7 @@ export interface NurseTaskBase {
   assignedTo: string
   sourceEventType: SourceEventType
   sourceEventId: string
+  serverVersion?: number
   auditTrail: TaskAuditEntry[]
 }
 

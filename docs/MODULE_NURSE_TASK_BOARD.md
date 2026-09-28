@@ -1,190 +1,32 @@
-# Module: Nurse Task Board
+# Nurse task board
 
-## Goal
+## Workspace
 
-The nurse task board is the nurse-facing execution module for bedside work. It is designed to show only actionable, structured tasks and make execution traceable.
+Queue and Patients show the ward roster and selected patient context. Patient actions open Tasks, Record vitals, or Notes. Task filters support search, status, and category. Handover opens the embedded shift feature.
 
-## User Experience Intent
+## Bedside actions
 
-The board should let a ward nurse:
+- Medication displays the confirmed order and requires the unchecked patient/drug/dose/route/timing confirmation before administration.
+- Observation forms accept numbers or unrecorded nulls, show NEWS2 completeness and missing parameters, and send a structured observation command.
+- Start, defer, and escalate use the repository task-transition API. Reasons are required for defer/escalate. Unsupported generic completion is rejected rather than inventing a successful clinical record.
+- Notes are patient-specific unsigned device drafts with quick text templates and a visible device save timestamp.
 
-- land on the queue first and immediately see who needs attention
-- filter work by status and task category
-- open a task and act without navigating through multiple screens
-- keep the active patient context visible while moving between tabs
-- record vitals safely
-- confirm medication administration explicitly
-- draft quick nursing notes that autosave through interruptions
-- defer or escalate when bedside execution is unsafe or blocked
-- work inside a calm, low-stimulation visual system that preserves clarity without broadcasting panic
+## Sources of truth
 
-## Current Screen Structure
+The platform is authoritative in normal mode. Writes include command UUIDs and expected task versions. The UI refreshes after server acceptance and exposes failures.
 
-### Main Screen
+Explicit `?demo=1` uses the retained mock repositories and localStorage keys. It is visibly synthetic and is never selected because an API request failed.
 
-File: `src/screens/NurseTaskBoardScreen.tsx`
+## Offline behavior
 
-Responsibilities:
+A failed network write with a command ID is saved in the existing Dexie queue and described as awaiting sync, not server-completed. Reconnection replays under the matching identity and organization. Conflicts and permission failures stay visible in the review count.
 
-- render the `Klinik-N` nurse-facing product header and status metrics
-- keep the queue as the default home surface
-- show online/offline state through a compact top-right status signal
-- render a bottom tab bar on mobile and a left workspace rail on desktop
-- keep a persistent selected-patient context bar visible when a patient is active
-- render queue, task, vitals, notes, and patient-roster workspaces
+## Code map
 
-### Queue And Navigation
+- `src/app.component.ts/html`: Angular screen and forms.
+- `src/repositories/api/ApiRepositories.ts`: real task/vitals command mapping.
+- `src/repositories/mock/`: synthetic demo data and persistence.
+- `src/services/platformSession.ts`, `offlineQueue.ts`: authenticated transport and replay.
+- `src/utils/calculateNEWS2.ts`: preview of incomplete/complete observations.
 
-Files:
-
-- `src/components/nurse/NurseWorkspaceNav.tsx`
-- `src/components/nurse/QueuePanel.tsx`
-- `src/components/nurse/PatientContextBar.tsx`
-- `src/components/nurse/NurseTaskFilters.tsx`
-
-Responsibilities:
-
-- make the nurse queue the default home screen
-- expose large tap targets for `Call next`, `Record vitals`, and `Open tasks`
-- keep search available in patient-first screens without crowding them with task-only filters
-- preserve patient identity and NEWS2 context across workspace tabs
-
-### Task List
-
-Files:
-
-- `src/components/nurse/NurseTaskCard.tsx`
-- `src/components/nurse/PatientRosterPanel.tsx`
-
-Responsibilities:
-
-- search by patient, bed, or task text
-- filter by status and category inside task-centric tabs
-- show patient name, bed, NEWS2, priority, due time, and task status
-- let the nurse open a task quickly by clicking directly on the task card
-- keep the ward roster as a lower-priority reference section below the active task workspace
-
-### Task Detail
-
-File: `src/components/nurse/NurseTaskDetailPanel.tsx`
-
-Responsibilities:
-
-- show patient context
-- show latest known vitals summary when present
-- expose task-specific actions
-- show task audit trail
-
-### Task-Specific Forms
-
-Files:
-
-- `src/components/nurse/NotesPanel.tsx`
-- `src/components/nurse/VitalsEntryForm.tsx`
-- `src/components/nurse/MedicationAdministrationForm.tsx`
-
-Responsibilities:
-
-- `NotesPanel` provides quick templates and autosaves note drafts locally by patient
-- `VitalsEntryForm` captures structured vitals and previews NEWS2
-- `VitalsEntryForm` uses numeric-friendly inputs, inline recheck alerts, and a `Same as last visit` shortcut
-- `MedicationAdministrationForm` enforces explicit bedside confirmation
-
-## Logic Owner
-
-The module logic lives in `src/hooks/useNurseTaskBoard.ts`.
-
-This hook currently owns:
-
-- initial board loading
-- workspace tab state
-- filters plus selected patient and task state
-- nurse note draft autosave state
-- error and success notice state
-- task status actions
-- vitals save flow
-- medication confirmation flow
-- board refresh after each action
-
-## Current Task Model
-
-Task data is typed in `src/types/NurseTask.ts`.
-
-Current task categories:
-
-- `vitals`
-- `medication`
-- `nursing`
-- `investigation-followup`
-
-Current task statuses:
-
-- `pending`
-- `in-progress`
-- `completed`
-- `deferred`
-- `escalated`
-
-Every task also carries:
-
-- `patientId`
-- `priority`
-- `sourceEventType`
-- `sourceEventId`
-- `auditTrail`
-
-The source-event fields are important because the final product direction is event-driven even though the current slice is still mock-seeded.
-
-## Current Persistence Behavior
-
-- Nurse tasks are seeded from `src/data/nurseTasks/mockNurseTasks.ts`
-- Task actions are written to browser `localStorage`
-- Vitals are written to browser `localStorage`
-- Patients are seeded from `src/data/patients/mockPatients.ts`
-- Nurse note drafts are written to browser `localStorage`
-
-This means local interaction survives refresh in the current scaffold.
-
-## Current Clinical Logic
-
-### Vitals
-
-- The vitals form stores numeric-or-null values.
-- NEWS2 preview updates from the form state.
-- The user cannot complete the vitals task unless the required NEWS2 fields are present.
-
-### Product Framing
-
-- The header now leads with the product name `Klinik-N` rather than a module code banner.
-- The brand treatment uses a deeper blue gradient so the wordmark stays legible against the soft header surface.
-- The connection status now sits quietly in the top-right corner as a compact signal instead of occupying primary visual space.
-- The queue is the default workflow surface, while the patient roster is intentionally kept after task work so active execution stays primary.
-- The selected-patient quick actions now visibly highlight the active workspace so task and vitals context never switch silently.
-
-### Medication
-
-- Administration requires a positive confirmation checkbox.
-- The task cannot be completed without that confirmation.
-
-### Audit
-
-- Start, complete, defer, and escalate all append audit entries.
-- The current implementation updates task status directly and preserves a simple audit timeline.
-
-## What Needs To Be Built Next
-
-- Generate tasks from confirmed SOAP notes and orders instead of static mock tasks
-- Add role/auth context
-- Add sync semantics for offline changes
-- Add tests around NEWS2, medication safety, and task state transitions
-- Split very large files as the module grows
-
-## Documentation Maintenance
-
-Update this document whenever:
-
-- a new task category is added
-- task state rules change
-- new nurse actions are introduced
-- the detail panel behavior changes
-- the nurse workflow changes from mock-seeded to event-generated
+Missing measurements never receive normal values automatically. Clinical attribution and final NEWS2 are computed and validated by the server.

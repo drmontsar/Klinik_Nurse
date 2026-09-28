@@ -1,0 +1,10 @@
+{
+  "name": "KliniK Nurse",
+  "short_name": "KliniK Nurse",
+  "description": "Ward task execution",
+  "start_url": "/nurse/",
+  "scope": "/nurse/",
+  "display": "standalone",
+  "theme_color": "#195c4f",
+  "background_color": "#eef4f0"
+}

@@ -25,14 +25,13 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: 20
-          cache: npm
+          node-version-file: .node-version
 
       - name: Install dependencies
-        run: npm ci
+        run: corepack pnpm install --frozen-lockfile
 
       - name: Build app
-        run: npm run build
+        run: corepack pnpm run build
 
       - name: Setup GitHub Pages
         uses: actions/configure-pages@v5
@@ -40,7 +39,7 @@ jobs:
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: ./dist
+          path: ./dist/klinik-nurse/browser
 
   deploy:
     environment:

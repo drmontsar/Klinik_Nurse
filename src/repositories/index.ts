@@ -5,25 +5,26 @@ import type { IVitalsRepository } from '@/repositories/interfaces/IVitalsReposit
 import { MockNurseTaskRepository } from '@/repositories/mock/MockNurseTaskRepository'
 import { MockPatientRepository } from '@/repositories/mock/MockPatientRepository'
 import { MockVitalsRepository } from '@/repositories/mock/MockVitalsRepository'
+import { ApiNurseTaskRepository, ApiPatientRepository, ApiVitalsRepository } from '@/repositories/api/ApiRepositories'
 
-function getImplementation<MockImplementation>(
+function getImplementation<MockImplementation, ApiImplementation>(
   MockRepository: new () => MockImplementation,
-): MockImplementation {
-  if (VENDORS.DATA_SOURCE !== 'mock') {
-    throw new Error('Only mock data source is configured in this scaffold.')
-  }
-
-  return new MockRepository()
+  ApiRepository: new () => ApiImplementation,
+): MockImplementation | ApiImplementation {
+  return VENDORS.DATA_SOURCE === 'api' ? new ApiRepository() : new MockRepository()
 }
 
-export const patientRepository: IPatientRepository = getImplementation(
+export const patientRepository = getImplementation(
   MockPatientRepository,
+  ApiPatientRepository,
 )
 
-export const nurseTaskRepository: INurseTaskRepository = getImplementation(
+export const nurseTaskRepository = getImplementation(
   MockNurseTaskRepository,
+  ApiNurseTaskRepository,
 )
 
-export const vitalsRepository: IVitalsRepository = getImplementation(
+export const vitalsRepository = getImplementation(
   MockVitalsRepository,
+  ApiVitalsRepository,
 )

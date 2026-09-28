@@ -1,0 +1,22 @@
+{
+  "/auth/**": {
+    "target": "http://localhost:3000",
+    "secure": false,
+    "changeOrigin": false
+  },
+  "/me": {
+    "target": "http://localhost:3000",
+    "secure": false,
+    "changeOrigin": false
+  },
+  "/organizations/**": {
+    "target": "http://localhost:3000",
+    "secure": false,
+    "changeOrigin": false
+  },
+  "/docs/openapi.json": {
+    "target": "http://localhost:3000",
+    "secure": false,
+    "changeOrigin": false
+  }
+}

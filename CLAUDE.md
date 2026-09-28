@@ -145,16 +145,15 @@ Error Messages — Specific and Actionable
  will sync when connected."
 Every error tells the doctor exactly what happened and exactly what to do next. Never leave her stranded.
 State Management
-Local component state: useState for UI state Cross-screen state: props drilling for now, Zustand when complexity demands it Persistent state: localStorage for time saved, corrections count, keyboard history Server state: TanStack Query when backend connects
+Current Nurse UI state: Angular signals and computed selections. Persistent device state: namespaced localStorage note drafts and the existing Dexie command queue. API repositories provide server state.
 
 Current Technology Stack
-Frontend framework:   React 18 + TypeScript
-Build tool:           Vite
-Styling:              Inline styles using constants/colors.ts
-                      No CSS files, no className strings
-Navigation:           useState screen routing for now
-Deployment:           Vercel
-PWA:                  vite-plugin-pwa
+Frontend framework:   Angular 22.2 + TypeScript 6
+Build tool:           Angular application builder
+Styling:              src/styles.css
+Navigation:           Angular signal-backed workspace tabs
+Deployment artifact:  dist/klinik-nurse/browser/ mounted at /nurse/
+PWA:                  Angular service worker; app assets only
 
 AI — SOAP generation:  Claude API
                        Model: claude-sonnet-4-20250514
@@ -1354,7 +1353,7 @@ Module 1.1 — Rounds Companion
 	•	[ ] Vercel deployment
 	•	[ ] Android tablet testing complete
 Module 1.2 — Nurse Task Board
-	•	[x] React + TypeScript + Vite scaffold created
+	•	[x] Angular 22.2 frontend migration complete; React/Vite scaffold retired
 	•	[x] Nurse Task Board screen created
 	•	[x] Nurse task filters and task cards created
 	•	[x] Nurse task detail panel created
@@ -1366,9 +1365,9 @@ Module 1.2 — Nurse Task Board
 	•	[x] Defer and escalate task flows with audit trail created
 	•	[x] Offline banner and local browser persistence created
 	•	[x] Klinik-N nurse-facing product header created
-	•	[ ] Event-driven task generation from confirmed notes
-	•	[ ] Role-based nurse authentication
-	•	[ ] Real backend sync
+	•	[x] Event-driven medication-task generation from confirmed orders
+	•	[x] Role-based nurse authentication through the platform session
+	•	[x] Real backend sync for queue, administrations, observations, and transitions
 Module 1.3 — Investigation Tracker
 	•	[ ] Not started
 Module 1.4 — Clinical Messaging

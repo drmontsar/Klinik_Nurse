@@ -1,147 +1,34 @@
-# Architecture
+# Nurse architecture
 
-## Purpose
+## Runtime
 
-This document explains how the current codebase is structured, how data moves through the app, and which product rules are already enforced in code.
+Angular 22.2 standalone `AppComponent` is bootstrapped by `src/main.ts`. Signals hold screen state and computed task/patient selections. Angular forms provide native input validation; global CSS is in `src/styles.css`.
 
-## Core Principles
+`src/repositories/index.ts` selects API repositories by default or explicit synthetic demo repositories. The existing framework-independent types, clinical calculation, demo data, and repositories remain in use. React components, hooks, entry points, and standalone Vite configuration were removed.
 
-- Clinical-first workflow: the UI is built around bedside execution, not generic task management.
-- Queue-first navigation: the nurse lands on the queue first, then moves into tasks, vitals, notes, and roster from one consistent workspace shell.
-- Structured data only: vitals, tasks, medication confirmations, and patient context are typed.
-- Offline-friendly behavior: the board can continue functioning from browser storage.
-- Audit-friendly actions: task completion, defer, and escalate actions append to an audit trail.
-- Repository abstraction: screens and hooks do not read mock data directly.
+## Connected flow
 
-## Current Runtime Flow
+1. `platformSession.bootstrap()` reads the verified identity and Nurse/Admin membership, selects an authorized organization if necessary, and gets a ward assignment.
+2. API repositories load encounters and task projections through the same-origin gateway.
+3. Bedside actions send a command UUID and expected server version. Backend authorization, version checks, idempotency, and NEWS2 calculation remain authoritative.
+4. UI reports server acceptance, failure, or device-queued state distinctly, then refreshes current projections.
 
-1. `src/main.tsx` boots the React app.
-2. `src/App.tsx` renders `NurseTaskBoardScreen`.
-3. `src/screens/NurseTaskBoardScreen.tsx` composes the module UI.
-4. `src/hooks/useNurseTaskBoard.ts` owns loading, filtering, selection, note drafting, and nurse actions.
-5. The hook talks to repositories exported from `src/repositories/index.ts`.
-6. The active repositories are currently mock implementations.
-7. Mock repositories read from mock data and persist nurse actions to `localStorage`.
-8. Selected-patient notes also autosave to `localStorage` so interruptions do not discard work in progress.
+Clinical identities are derived by the server. Demo clinician labels are not trusted authorship.
 
-## Directory Guide
+## Device state
 
-- `src/components/nurse/`
-  Nurse-task-board UI pieces such as queue, workspace navigation, patient context, filters, cards, detail panel, notes, vitals form, and medication form.
-- `src/components/shared/`
-  Shared UI primitives such as loading, error, offline, and NEWS2 badges.
-- `src/constants/`
-  Colors, config, and NEWS2 thresholds.
-- `src/data/`
-  Mock patients and mock nurse tasks.
-- `src/hooks/`
-  Board logic, viewport behavior, and browser online/offline state.
-- `src/repositories/`
-  Interfaces, implementations, and the repository entry point.
-- `src/screens/`
-  Screen-level composition. Right now the app has one main screen.
-- `src/types/`
-  Domain contracts for patients, vitals, tasks, and medication administration.
-- `src/utils/`
-  Pure functions such as NEWS2 calculation and latency simulation.
+- `OfflineQueue` retains the existing Dexie database `klinik-nurse-<identity>-<organization>-v1` and command schema.
+- Pending commands replay on reconnect only when current identity and organization match. HTTP 401/403/409 moves a command to `needs_review`.
+- Device note drafts use identity/organization-specific keys in connected mode and the existing draft key in demo mode.
+- API-mode last observations are an in-memory convenience, not a replacement for the server chart. Demo repositories retain their existing localStorage records.
+- Angular service worker caches the production shell only. It does not cache private API responses. Loading an uncached ward while fully offline still requires a connection.
 
-## Current Data Sources
+## Safety rules
 
-### Patients
+Medication confirmation is explicit and resets when selecting a task. Vitals start unrecorded; missing values remain null and an incomplete assessment has no complete NEWS2 score. Drafts are labeled unsigned. Repository failures are shown and do not silently switch to synthetic data.
 
-- Source: `src/data/patients/mockPatients.ts`
-- Repository: `MockPatientRepository`
-- Current behavior:
-  returns a NEWS2-sorted patient list
-  supports reading by id
-  supports NEWS2 updates after full vitals capture
-  keeps all ward patient seed data in one file while preserving the same repository contract for a later real database
+Handover is a button in the Nurse application backed by the shared session/item/acknowledgment APIs. Acknowledgments name the exact reviewed item version.
 
-### Nurse Notes Drafts
+## Build boundary
 
-- Source: browser `localStorage`
-- Owner: `useNurseTaskBoard`
-- Current behavior:
-  stores draft nursing notes by patient id
-  updates the saved timestamp on each keystroke
-  keeps note drafting separate from repository-backed clinical records until a later real note domain is introduced
-
-### Nurse Tasks
-
-- Source: `src/data/nurseTasks/mockNurseTasks.ts`
-- Repository: `MockNurseTaskRepository`
-- Current behavior:
-  seeds the task board with mock tasks
-  persists task status and audit changes to `localStorage`
-  sorts tasks by urgency and due time
-
-### Vitals
-
-- Source: browser `localStorage`
-- Repository: `MockVitalsRepository`
-- Current behavior:
-  stores structured vitals entries
-  exposes latest vitals by patient
-  supports NEWS2 updates in the nurse board flow
-
-## Action Flows
-
-### Start Task
-
-- Triggered from the detail panel when a task is still `pending`
-- Repository appends an audit entry with status `in-progress`
-
-### Complete Generic Task
-
-- Used for nursing and investigation follow-up tasks
-- Optional note is captured
-- Repository appends a `completed` audit entry
-
-### Record Vitals
-
-- Nurse enters only numeric-or-null vitals values
-- Mobile-friendly numeric keyboards are requested through `inputMode`
-- Inline recheck warnings surface abnormal values while the nurse types
-- A `Same as last visit` shortcut can preload the latest structured vitals
-- `calculateNEWS2` validates completeness
-- Incomplete vitals do not produce a final NEWS2 score
-- Complete vitals are saved
-- Patient NEWS2 is updated
-- The originating task is marked `completed`
-
-### Administer Medication
-
-- The nurse must explicitly confirm bedside checks
-- Medication confirmation is never implicit
-- The task is only completed after confirmation
-
-### Defer Or Escalate
-
-- A reason is mandatory
-- The task status changes
-- An audit entry is appended
-
-## Safety Logic Already Enforced
-
-- NEWS2 cannot silently compute from partial vitals.
-- Vitals in app state are numbers or `null`, not arbitrary strings.
-- Medication administration requires explicit confirmation.
-- Task actions append to an audit trail rather than overwriting history.
-
-## Current Limitations
-
-- Tasks are still seeded from static mock data, not generated from real clinical events.
-- There is no authentication flow yet.
-- There is no backend sync yet.
-- There are no automated tests yet.
-- Notes are still local nurse drafts, not confirmed chart notes.
-
-## Documentation Maintenance
-
-Update this document whenever:
-
-- repository wiring changes
-- a new data source is added
-- task generation logic changes
-- safety-critical logic changes
-- a new screen or major module is introduced
+`angular.json` uses the Angular application builder, `/nurse/` base and service worker scope, and port 5173 for development. Production assets are in `dist/klinik-nurse/browser/`. API proxy rules preserve the browser Origin; connected development should use the gateway at port 8080.

@@ -1,8 +1,12 @@
+import { isDevMode } from '@angular/core';
+
 export const VENDORS = {
-  DATA_SOURCE: 'mock',
+  DATA_SOURCE: isDevMode() && new URLSearchParams(location.search).get('demo') === '1'
+    ? 'mock'
+    : 'api' as 'mock' | 'api',
 } as const
 
-export const MOCK_MODE = true
+export const MOCK_MODE = VENDORS.DATA_SOURCE === 'mock'
 
 export const STORAGE_KEYS = {
   NURSE_TASKS: 'klinik-nurse.tasks',

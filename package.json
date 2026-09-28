@@ -1,23 +1,35 @@
 {
   "name": "klinik-nurse",
-  "private": true,
   "version": "0.1.0",
-  "type": "module",
+  "private": true,
+  "packageManager": "pnpm@12.5.1",
+  "engines": {
+    "node": ">=24.15.0 <25"
+  },
   "scripts": {
-    "dev": "vite",
-    "build": "tsc --noEmit && vite build",
-    "preview": "vite preview"
+    "dev": "pnpm run ui",
+    "ui": "pnpm run docs:prepare && ng serve --proxy-config proxy.conf.json",
+    "build": "pnpm run docs:prepare && ng build --configuration production",
+    "typecheck": "ngc -p tsconfig.app.json",
+    "docs:prepare": "cp node_modules/swagger-ui-dist/swagger-ui.css node_modules/swagger-ui-dist/swagger-ui-bundle.js public/docs/"
   },
   "dependencies": {
-    "react": "^18.3.1",
-    "react-dom": "^18.3.1"
+    "@angular/common": "22.2.0",
+    "@angular/compiler": "22.2.0",
+    "@angular/core": "22.2.0",
+    "@angular/forms": "22.2.0",
+    "@angular/platform-browser": "22.2.0",
+    "@angular/router": "22.2.0",
+    "@angular/service-worker": "22.2.0",
+    "dexie": "4.2.1",
+    "rxjs": "7.8.2",
+    "tslib": "2.8.1"
   },
   "devDependencies": {
-    "@types/react": "^18.3.12",
-    "@types/react-dom": "^18.3.1",
-    "@vitejs/plugin-react": "^4.3.3",
-    "typescript": "^5.6.3",
-    "vite": "^5.4.10",
-    "vite-plugin-pwa": "^0.20.5"
+    "@angular/build": "22.2.0",
+    "@angular/cli": "22.2.0",
+    "@angular/compiler-cli": "22.2.0",
+    "swagger-ui-dist": "5.33.0",
+    "typescript": "6.0.2"
   }
 }
