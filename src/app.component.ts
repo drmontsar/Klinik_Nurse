@@ -34,6 +34,26 @@ export class AppComponent implements OnInit, OnDestroy {
   readonly handover = signal<Handover | null>(null);
   readonly queued = signal(0);
   readonly review = signal(0);
+  /** NEWS2 preview badge derived from the currently entered vitals draft. Never shows 0 for incomplete sets. */
+  readonly news2Preview = computed(() => {
+    const a = this.assessment;
+    if (a.score === null) return null;
+    const token = a.risk === 'high' ? 'danger' : a.risk === 'medium' ? 'warning' : a.risk === 'low-medium' ? 'caution' : 'success';
+    return { score: a.score, risk: a.risk ?? 'unknown', token, label: `NEWS2 ${a.score} (${a.risk ?? 'incomplete'}) — as entered` };
+  });
+
+  /** Open task counts per category for tab badges. */
+  readonly taskCounts = computed(() => {
+    const open = this.tasks().filter(t => ['pending', 'in-progress'].includes(t.status));
+    return { all: open.length, vitals: open.filter(t => t.category === 'vitals').length, medication: open.filter(t => t.category === 'medication').length };
+  });
+
+  /** Session display text — role context from real session, clinician name in demo. */
+  readonly sessionLabel = computed(() => {
+    if (this.demo) return 'Demo · ' + CLINICIAN_CONTEXT.clinicianName;
+    try { const ctx = platformSession.context(); return 'Nurse · ' + ctx.identityId; } catch { return 'Loading session…'; }
+  });
+
   readonly filteredTasks = computed(() => this.tasks().filter(task => {
     const patient = this.patients().find(item => item.id === task.patientId);
     const status = this.status();
