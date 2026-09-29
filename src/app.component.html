@@ -302,7 +302,9 @@
                           title="Copy last recorded device observations into this form">
                           Use last device observations
                         </button>
-                        <button class="btn btn-primary" type="submit" [disabled]="saving() || vitalsForm.invalid">
+                        <button class="btn btn-primary" type="submit"
+                          [disabled]="saving() || vitalsForm.invalid"
+                          [attr.aria-busy]="saving() ? 'true' : null">
                           @if (saving()) { Saving… } @else { Save observations }
                         </button>
                       </div>
@@ -342,7 +344,8 @@
                       <div class="actions">
                         <button class="btn btn-primary" type="submit"
                           [disabled]="saving() || medicationForm.invalid || !confirmed"
-                          [title]="!confirmed ? 'Confirm patient identity before administering' : ''">
+                          [title]="!confirmed ? 'Confirm patient identity before administering' : ''"
+                          [attr.aria-busy]="saving() ? 'true' : null">
                           @if (saving()) { Recording… } @else { Confirm administration }
                         </button>
                       </div>
@@ -357,7 +360,9 @@
                         <textarea id="checklist-note" name="checklistNote" [(ngModel)]="checklistNote" rows="3"></textarea>
                       </div>
                       <div class="actions">
-                        <button class="btn btn-primary" type="submit" [disabled]="saving()">
+                        <button class="btn btn-primary" type="submit"
+                          [disabled]="saving()"
+                          [attr.aria-busy]="saving() ? 'true' : null">
                           @if (saving()) { Completing… } @else { Complete task }
                         </button>
                       </div>
