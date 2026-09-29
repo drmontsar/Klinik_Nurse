@@ -1,7 +1,10 @@
+import { isDevMode } from '@angular/core';
 import { OfflineQueue } from './offlineQueue';
 type Membership = { organization_id: string; role: string; wardIds: string[] };
 type Me = { identity: { id: string }; csrfToken: string; selectedOrganizationId: string | null; memberships: Membership[] };
 export class QueuedCommandError extends Error {}
+/** Guard so a stale cross-module session cookie triggers at most one dev auto-login retry, never a loop. */
+const DEV_SWITCH_GUARD = 'klinik-dev-role-switch';
 
 class PlatformSession {
   private csrfToken = '';
@@ -17,7 +20,16 @@ class PlatformSession {
     if (!response.ok) throw new Error('Could not load your clinical session. Refresh and retry.');
     const me = await response.json() as Me;
     const membership = me.memberships.find(item => item.organization_id === me.selectedOrganizationId && ['nurse', 'admin'].includes(item.role)) ?? me.memberships.find(item => ['nurse', 'admin'].includes(item.role));
-    if (!membership?.wardIds[0]) throw new Error('Your account needs Nurse access and a ward assignment. Open Nurse session to select your local role.');
+    if (!membership) {
+      if (isDevMode() && !sessionStorage.getItem(DEV_SWITCH_GUARD)) {
+        sessionStorage.setItem(DEV_SWITCH_GUARD, '1');
+        location.assign('/auth/login?returnTo=/nurse/');
+        return;
+      }
+      throw new Error('This account needs Nurse access. Open Nurse session to select your local role.');
+    }
+    sessionStorage.removeItem(DEV_SWITCH_GUARD);
+    if (!membership.wardIds[0]) throw new Error('Your account has no ward assignment.');
     if (me.selectedOrganizationId !== membership.organization_id) {
       const selection = await fetch('/auth/selection', { method: 'POST', credentials: 'include', headers: { 'Content-Type': 'application/json', 'X-CSRF-Token': me.csrfToken }, body: JSON.stringify({ organizationId: membership.organization_id }) });
       if (!selection.ok) throw new Error('Could not select your Nurse organization.');
