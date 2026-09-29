@@ -6,6 +6,14 @@ export class QueuedCommandError extends Error {}
 /** Guard so a stale cross-module session cookie triggers at most one dev auto-login retry, never a loop. */
 const DEV_SWITCH_GUARD = 'klinik-dev-role-switch';
 
+/** Double-submit CSRF cookie the API sets/rotates alongside the session cookie.
+ * Read fresh on every mutation instead of a value cached at bootstrap, so a
+ * token rotated by another tab (module switch, org selection) is never stale. */
+function readCsrfCookie(): string | null {
+  const match = document.cookie.split('; ').find((row) => row.startsWith('klinik_csrf='));
+  return match ? decodeURIComponent(match.slice('klinik_csrf='.length)) : null;
+}
+
 class PlatformSession {
   private csrfToken = '';
   private organizationId = '';
@@ -46,7 +54,7 @@ class PlatformSession {
     if (!this.ready) throw new Error('Clinical session is still loading.');
     return { organizationId: this.organizationId, wardId: this.wardId, identityId: this.identityId };
   }
-  async request<T>(path: string, init?: RequestInit): Promise<T> {
+  async request<T>(path: string, init?: RequestInit, retrying = false): Promise<T> {
     let response: Response;
     try { response = await this.send(path, init); } catch (error) {
       const body = typeof init?.body === 'string' ? init.body : '';
@@ -56,13 +64,26 @@ class PlatformSession {
       dispatchEvent(new Event('klinik-queue-changed'));
       throw new QueuedCommandError('Saved on this device; waiting for sync. The server has not confirmed this action.');
     }
+    if (response.status === 403 && !retrying) {
+      const failure = await response.clone().json().catch(() => null) as { message?: string } | null;
+      if (failure?.message === 'CSRF token denied') {
+        await this.refreshCsrfToken();
+        return this.request<T>(path, init, true);
+      }
+    }
     if (!response.ok) {
       const data = await response.json().catch(() => null) as { message?: string; code?: string } | null;
       throw new Error(data?.message ?? data?.code ?? 'Clinical request failed (' + response.status + '). Refresh and review.');
     }
     return response.json() as Promise<T>;
   }
-  private send(path: string, init?: RequestInit) { return fetch(path, { credentials: 'include', cache: 'no-store', ...init, headers: { 'Content-Type': 'application/json', 'X-CSRF-Token': this.csrfToken, ...init?.headers } }); }
+  private send(path: string, init?: RequestInit) { return fetch(path, { credentials: 'include', cache: 'no-store', ...init, headers: { 'Content-Type': 'application/json', 'X-CSRF-Token': readCsrfCookie() ?? this.csrfToken, ...init?.headers } }); }
+  /** Safety net for the rare case the cookie was missing/stale too: re-sync from /me once. */
+  private async refreshCsrfToken(): Promise<void> {
+    const response = await fetch('/me', { credentials: 'include', cache: 'no-store' });
+    if (!response.ok) return;
+    this.csrfToken = (await response.json() as Me).csrfToken;
+  }
   private async flush() {
     // CLINICAL: Never replay another identity's saved commands after a module role switch.
     try {
